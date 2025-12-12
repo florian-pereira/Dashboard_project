@@ -6,7 +6,6 @@ import os
 import sys
 
 # -----------------------------------------------------------
-# 1. HACK D'IMPORTATION
 # Permet de remonter à la racine pour trouver 'config.py'
 # -----------------------------------------------------------
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -25,7 +24,7 @@ def get_live_traffic_data():
     Récupère les avions en temps réel via l'API OpenSky.
     Sauvegarde les données brutes dans 'traffic_raw.csv'.
     """
-    print("[1/2] Connexion à OpenSky (Trafic en temps réel)...")
+    print("[1/2] Connexion à OpenSky pour récupérer les données de trafic aérien...")
     
     # Paramètres pour cibler la l'Europe
     # l'API OpenSky demande des paramètres dans l'URL
