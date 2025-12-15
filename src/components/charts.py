@@ -1,11 +1,16 @@
 import pandas as pd
 import plotly.express as px
+import os 
 
-# 1. Chargement de votre base de données
-df = pd.read_csv('airports_cleaned.csv')
+# Assurez-vous que le chemin vers le fichier est correct
+file_path = 'airports_cleaned.csv' 
+df = pd.read_csv(file_path)
 
-# 2. Création de l'histogramme de l'altitude
-fig = px.histogram(df, x='Altitude', title='Distribution de l\'Altitude des Aéroports')
+# Création de l'histogramme de l'altitude
+# J'ajoute nbins pour avoir un peu plus de détail dans la distribution
+fig = px.histogram(df, 
+                   x='Altitude', 
+                   nbins=50, 
+                   title='Distribution de l\'Altitude des Aéroports (Exploration Plotly)')
 
-# 3. Affichage
 fig.show()
