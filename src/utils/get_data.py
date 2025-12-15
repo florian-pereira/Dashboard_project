@@ -27,7 +27,7 @@ def get_live_traffic_data():
     # Paramètres pour cibler la l'Europe
     # l'API OpenSky demande des paramètres dans l'URL
     params = "?lamin=35.00&lomin=-15.00&lamax=72.00&lomax=45.00"
-    url = OPENSKY_URL + params
+    url = OPENSKY_URL 
     
     try:
 
@@ -52,7 +52,7 @@ def get_live_traffic_data():
                 df.to_csv(TRAFFIC_RAW_FILE, index=False)
                 print(f" {len(df)} avions récupérés .")
             else:
-                print(" Aucun avion trouvé (Vérifie ta connexion ou l'heure).")
+                print(" aucun avion trouvé.")
 
     except urllib.error.URLError as e:
         print(f"  Erreur de connexion Internet : {e}")

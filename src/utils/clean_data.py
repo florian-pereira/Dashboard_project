@@ -24,14 +24,14 @@ def process_live_traffic():
         df = pd.read_csv(TRAFFIC_RAW_FILE)
 
         # On ne garde que les avions EN L'AIR
-        df = df[ (df['on_ground'] == False) & (df['baro_altitude'].notna()) ].copy()
+        df = df[ (df['on_ground'] == False) & (df['baro_altitude'].notna()) & (df['origin_country'] == 'France')].copy()
 
         #  Vitesse m/s en km/h
         if 'velocity' in df.columns:
             df['velocity_kmh'] = df['velocity'] * 3.6
         else:
             df['velocity_kmh'] = 0
-
+        """
         # Création de la colonne 'origin_category' 
         # qui nous servira pour donner la couleur entre les avions Francais et internationaux.    
         # fonction de tri des pays (France vs International)
@@ -42,14 +42,13 @@ def process_live_traffic():
                 return 'International' # Tout le reste devient International
 
         df['origin_category'] = df['origin_country'].apply(trier_pays)
-        
+        """        
 
         #  On ne garde que les colonnes utiles :
-        #
         
         cols_to_keep = [
             'icao24', 'callsign', 'origin_country', 'longitude', 'latitude', 
-            'baro_altitude', 'true_track', 'velocity_kmh', 'origin_category'
+            'baro_altitude', 'true_track', 'velocity_kmh', 'origin_country'
         ]
         cols_final = [c for c in cols_to_keep if c in df.columns]
         df = df[cols_final]
