@@ -28,7 +28,7 @@ def process_live_traffic():
 
         #  Vitesse m/s en km/h
         if 'velocity' in df.columns:
-            df['velocity_kmh'] = df['velocity'] * 3.6
+            df['velocity_kmh'] = (df['velocity'] * 3.6).astype('Int64')
         else:
             df['velocity_kmh'] = 0
         """
@@ -80,10 +80,11 @@ def process_static_data():
         # Compté le nombre de routes par aéroport
         route_counts = df_routes['Source Airport'].value_counts().reset_index() #reset_index pour transformer en une nouvelle DataFrame
         route_counts.columns = ['IATA', 'Route_Count']
+        route_counts['Route_Count'] = route_counts['Route_Count']
 
         # fusion des données d'aéroports avec le nombre de routes dans une nouvelle dataframe
         df_merged = pd.merge(df_air, route_counts, on='IATA', how='left')
-        df_merged['Route_Count'] = df_merged['Route_Count'].fillna(0) # Remplacer NaN par 0
+        df_merged['Route_Count'] = df_merged['Route_Count'].fillna(0).astype(int)# Remplacer NaN par 0 et forcer le nb de routes a etre int 
 
         # on garde les aéroports avec au moins 5 routes 
         df_final = df_merged.query("Route_Count >= 5 ").copy()
