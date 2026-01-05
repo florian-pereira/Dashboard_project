@@ -1,8 +1,10 @@
+
 import folium, branca 
 import pandas as pd
 import os
 import sys
 import math
+from dash import html
 
 # Ajout du dossier racine au chemin système pour pouvoir importer les modules du projet
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -10,13 +12,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 # Import de la fonction personnalisée pour charger les données nettoyées
 from src.utils.clean_data import load_data
 
-def create_map_airports_plane():
+def render():
     """
-    Génère une carte HTML avec les aéroports (points fixes) 
-    et les avions orientés selon leur cap.
+    Génère la carte et la retourne sous forme de composant Dash.
     """
-    # --- PREPARATION ET CHARGEMENT DES DONNEES AEROPORTS ---
-    # Lecture du fichier csv des aéroports dans une dataframe
+
+    #Lecture du fichier csv dans une dataframe
     df_airports = load_data("airports")
 
     # Extraction des colonnes nécessaires pour la boucle
@@ -103,7 +104,7 @@ def create_map_airports_plane():
         # On indique au html la rotation de l'image de l'avion en fonction de la direction réelle de l'avion
         content_icone = f"""
             <div style="transform: rotate({angle}deg);">
-                <img src="avion_icone.png" style="width:30px; height:30px;">
+                <img src="/assets/avion_icone.png" style="width:30px; height:30px;">
             </div>
         """
 
@@ -129,9 +130,23 @@ def create_map_airports_plane():
     # Ajout du panneau de contrôle pour activer/désactiver les couches
     folium.LayerControl().add_to(map)
 
-    # Sauvegarde du fichier HTML final
-    map.save(outfile='aeroports_plane.html')
+    map_html = map.get_root().render()
 
-if __name__ == "__main__":
-    # Exécution de la fonction si le script est lancé directement
-    create_map_airports_plane()
+    # On retourne une Iframe qui contient le HTML de la map
+    return html.Div([
+    html.Iframe(
+        srcDoc=map_html,
+        style={
+            'width': '100%', 
+            'height': '600px', 
+            'border': 'none',
+            'borderRadius': '15px'  # <--- ARRONDIS SUR L'IFRAME
+        }
+    )
+], style={
+    'width': '100%', 
+    'borderRadius': '15px',     # <--- ARRONDIS SUR LE CADRE
+    'overflow': 'hidden',       # <--- INDISPENSABLE pour couper les coins
+    'boxShadow': '0 4px 20px rgba(0,0,0,0.5)'
+})
+
