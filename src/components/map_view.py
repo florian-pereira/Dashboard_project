@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from src.utils.clean_data import load_data
 
-def render(df_traffic):
+def render():
 
     #Lecture du fichier csv dans une dataframe
     df_airports = load_data("airports")

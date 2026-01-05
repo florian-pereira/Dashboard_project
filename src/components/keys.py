@@ -1,6 +1,6 @@
 from dash import html
 
-def render(df):
+def render():
     # Style du conteneur : vertical (column) avec de l'espace entre les cartes
     container_style = {
         'display': 'flex',

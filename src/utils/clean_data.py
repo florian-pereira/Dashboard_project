@@ -26,6 +26,7 @@ def process_live_traffic():
         # On ne garde que les avions EN L'AIR
         df = df[ (df['on_ground'] == False) & (df['baro_altitude'].notna()) ].copy()
 
+        df = df.dropna(subset=['latitude', 'longitude'])
         #  Vitesse m/s en km/h
         if 'velocity' in df.columns:
             df['velocity_kmh'] = df['velocity'] * 3.6
@@ -129,7 +130,3 @@ def load_data(dataset="traffic"):
         print(f" Fichier {path} introuvable. ")
         return pd.DataFrame()
 
-if __name__ == "__main__":
-
-    process_live_traffic()
-    process_static_data()

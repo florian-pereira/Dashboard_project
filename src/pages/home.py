@@ -19,7 +19,7 @@ CARD_STYLE = {
 }
 
 def layout():
-    df = None 
+    
 
     return html.Div([
         
@@ -44,7 +44,7 @@ def layout():
             
             # COLONNE GAUCHE (KPIs) : 15%
             html.Div([
-                keys.render(df)
+                keys.render()
             ], style={'width': '15%', 'marginRight': '20px'}),
 
             # COLONNE DROITE (Dashboard Interactif) : 85%
@@ -54,7 +54,7 @@ def layout():
                 html.Div([
                     # Carte (70% de la colonne de droite)
                     html.Div([
-                        map_view.render(df)
+                        map_view.render()
                     ], style={'width': '69%', 'marginRight': '1%'}),
                     
                     # Panneau d'info (30% de la colonne de droite)
@@ -65,7 +65,7 @@ def layout():
 
                 # Graphiques du bas
                 html.Div([
-                    charts.render(df)
+                    charts.render()
                 ], style=CARD_STYLE)
 
             ], style={'width': '85%'})

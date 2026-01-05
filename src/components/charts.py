@@ -2,7 +2,7 @@ from dash import dcc, html
 import plotly.express as px
 import pandas as pd
 
-def render(df):
+def render():
     # Faux graph pour la démo
     df_fake = pd.DataFrame({'x': [1, 2, 3], 'y': [10, 20, 15]})
     fig = px.bar(df_fake, x='x', y='y', title="Statistiques Globales")
