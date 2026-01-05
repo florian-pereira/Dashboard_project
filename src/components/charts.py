@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.express as px
 import os 
 import sys
+
 import plotly.io as pio
 
 # Force l'affichage dans le navigateur
