@@ -10,48 +10,54 @@ from config import (
     TRAFFIC_CLEANED_FILE, AIRPORTS_CLEANED_FILE
 )
 
-def process_live_traffic(df_raw=None): # 1. On ajoute un paramètre optionnel df_raw
+def process_live_traffic():
     """
-    Nettoie les données de trafic (Avions).
+    Nettoie les données de trafic  (Avions).
     """
     print("Nettoyage du Trafic Aérien...")
     
-    try:
-        # 2. LOGIQUE DE SOURCE : Si on ne reçoit pas de DF, on lit le CSV (ancien mode)
-        # Si on reçoit un DF (mode temps réel), on l'utilise directement.
-        if df_raw is not None:
-            df = df_raw
-        else:
-            if not os.path.exists(TRAFFIC_RAW_FILE):
-                print(" Fichier introuvable.")
-                return pd.DataFrame()
-            df = pd.read_csv(TRAFFIC_RAW_FILE)
+    if not os.path.exists(TRAFFIC_RAW_FILE):
+        print(" Fichier introuvable. Lancer d'abord get_data.py.")
+        return
 
-        # --- TA LOGIQUE DE NETTOYAGE (NE CHANGE PAS) ---
+    try:
+        df = pd.read_csv(TRAFFIC_RAW_FILE)
+
+        # On ne garde que les avions EN L'AIR
         df = df[ (df['on_ground'] == False) & (df['baro_altitude'].notna()) ].copy()
 
+        #  Vitesse m/s en km/h
         if 'velocity' in df.columns:
             df['velocity_kmh'] = df['velocity'] * 3.6
         else:
             df['velocity_kmh'] = 0
+        """
+        # Création de la colonne 'origin_category' 
+        # qui nous servira pour donner la couleur entre les avions Francais et internationaux.    
+        # fonction de tri des pays (France vs International)
+        def trier_pays(x):
+            if x == 'France':
+                return 'France'     # On garde France
+            else:
+                return 'International' # Tout le reste devient International
 
+        df['origin_category'] = df['origin_country'].apply(trier_pays)
+        """        
+
+        #  On ne garde que les colonnes utiles :
+        
         cols_to_keep = [
             'icao24', 'callsign', 'origin_country', 'longitude', 'latitude', 
-            'baro_altitude', 'true_track', 'velocity_kmh'
+            'baro_altitude', 'true_track', 'velocity_kmh', 'origin_country'
         ]
         cols_final = [c for c in cols_to_keep if c in df.columns]
         df = df[cols_final]
 
-        # --- CE QUI CHANGE À LA FIN ---
-        # On peut toujours sauvegarder pour archive
         df.to_csv(TRAFFIC_CLEANED_FILE, index=False)
-        
         print(f" Il y a {len(df)} avions en vol.")
-        return df # 3. INDISPENSABLE : On retourne le DataFrame nettoyé
 
     except Exception as e:
-        print(f" Erreur nettoyage trafic : {e}")
-        return pd.DataFrame() # Retourne un DF vide en cas d'erreur
+        print(f"  Erreur nettoyage trafic : {e}")
 
 def process_static_data():
     """
@@ -124,28 +130,6 @@ def load_data(dataset="traffic"):
         return pd.DataFrame()
 
 if __name__ == "__main__":
-    # On importe la fonction de l'autre fichier pour le test
-    from src.utils.get_data import get_live_traffic_data
-    
-    print("\n--- TEST CLEAN_DATA ---")
-    
-    # 1. On récupère le brut
-    raw = get_live_traffic_data()
-    
-    # 2. On nettoie (avec ta nouvelle fonction qui accepte le DF)
-    df_clean = process_live_traffic(raw)
-    
-    # 3. Vérifications
-    print(f"Type après nettoyage : {type(df_clean)}")
-    
-    if not df_clean.empty:
-        print(f"Avions en l'air après filtrage : {len(df_clean)}")
-        # Vérifie si la colonne km/h existe bien
-        if 'velocity_kmh' in df_clean.columns:
-            print("✅ La conversion km/h a réussi.")
-        
-        print("\nColonnes finales :", df_clean.columns.tolist())
-        print(df_clean[['callsign', 'baro_altitude', 'velocity_kmh']].head())
-    else:
-        print("Erreur : Le nettoyage a retourné un DataFrame vide.")
-    
+
+    process_live_traffic()
+    process_static_data()
