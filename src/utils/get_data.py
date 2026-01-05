@@ -6,7 +6,6 @@ import os
 import sys
 
 # Permet de remonter à la racine pour trouver 'config.py'
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from config import (
@@ -49,15 +48,15 @@ def get_live_traffic_data():
                 
   
                 df = pd.DataFrame(flights, columns=cols)
-                return df
-
+                df.to_csv(TRAFFIC_RAW_FILE, index=False)
+                print(f" {len(df)} avions récupérés .")
+            else:
+                print(" aucun avion trouvé.")
 
     except urllib.error.URLError as e:
         print(f"  Erreur de connexion Internet : {e}")
-        return pd.DataFrame()  # Retourne une DataFrame vide en cas d'erreur
     except Exception as e:
         print(f"  Erreur inattendue : {e}")
-        return pd.DataFrame()  # Retourne une DataFrame vide en cas d'erreur
 
 def get_static_AeroportsRoads_data():
 
@@ -89,17 +88,5 @@ def get_static_AeroportsRoads_data():
 
 #Test de la fonction
 if __name__ == "__main__":
-    # Appel de la fonction
-    df_test = get_live_traffic_data()
-    
-    # Vérifications
-    print("\n--- TEST GET_DATA ---")
-    print(f"Type de l'objet : {type(df_test)}")
-    
-    if not df_test.empty:
-        print(f"Nombre de lignes récupérées : {len(df_test)}")
-        print(f"Colonnes présentes : {df_test.columns.tolist()}")
-        print("\nVoici les 5 premières lignes :")
-        print(df_test.head())
-    else:
-        print("Attention : Le DataFrame est vide !")
+    get_live_traffic_data()
+    get_static_AeroportsRoads_data()
