@@ -80,10 +80,11 @@ def process_static_data():
         # Compté le nombre de routes par aéroport
         route_counts = df_routes['Source Airport'].value_counts().reset_index() #reset_index pour transformer en une nouvelle DataFrame
         route_counts.columns = ['IATA', 'Route_Count']
+        route_counts['Route_Count'] = route_counts['Route_Count']
 
         # fusion des données d'aéroports avec le nombre de routes dans une nouvelle dataframe
         df_merged = pd.merge(df_air, route_counts, on='IATA', how='left')
-        df_merged['Route_Count'] = df_merged['Route_Count'].fillna(0) # Remplacer NaN par 0
+        df_merged['Route_Count'] = df_merged['Route_Count'].fillna(0)# Remplacer NaN par 0 
 
         # on garde les aéroports avec au moins 5 routes 
         df_final = df_merged.query("Route_Count >= 5 ").copy()
@@ -95,6 +96,41 @@ def process_static_data():
     except Exception as e:
         print(f" Erreur traitement aéroports : {e}")
 
+def load_data(dataset="traffic"):
+    """
+    Charge les données PROPRES pour le dashboard
+    et convertit les colonnes en Entiers de manière robuste.
+    """
+    if dataset == "traffic":
+        path = TRAFFIC_CLEANED_FILE
+        # Liste des colonnes qu'on veut ABSOLUMENT en int
+        int_cols = ['baro_altitude', 'velocity_kmh']
+    
+    elif dataset == "airports":
+        path = AIRPORTS_CLEANED_FILE
+        int_cols = ['Route_Count']
+    
+    else:
+        return None
+
+    if os.path.exists(path):
+        # 1. On lit SANS forcer les types (pour éviter le crash immédiat)
+        df = pd.read_csv(path)
+
+        # 2. On convertit proprement chaque colonne
+        for col in int_cols:
+            if col in df.columns:
+                # 'coerce' transforme les erreurs (textes, bugs) en NaN
+                # round() gère les cas où on aurait 850.9 pour en faire 851
+                df[col] = pd.to_numeric(df[col], errors='coerce').round().astype('Int64')
+
+        return df
+    else:
+        print(f" Fichier {path} introuvable. ")
+        return pd.DataFrame()
+
 if __name__ == "__main__":
+
     process_live_traffic()
     process_static_data()
+    
