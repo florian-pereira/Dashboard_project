@@ -56,8 +56,6 @@ def create_map_airports_plane():
     LATS_PLANE = df_plane["latitude"]
     LONGS_PLANE = df_plane["longitude"]
     ANGLE_AVION = df_plane["true_track"]    # Cap de l'avion (0-360°)
-
-
     CALLSIGNS = df_plane["callsign"]
     VITESSE = df_plane["velocity_kmh"]
     PAYS = df_plane["origin_country"]
@@ -102,7 +100,7 @@ def create_map_airports_plane():
         popup_objet = folium.Popup(content_html, max_width=250)
 
 
-
+        # On indique au html la rotation de l'image de l'avion en fonction de la direction réelle de l'avion
         content_icone = f"""
             <div style="transform: rotate({angle}deg);">
                 <img src="avion_icone.png" style="width:30px; height:30px;">
@@ -120,7 +118,7 @@ def create_map_airports_plane():
         folium.Marker(
             location = [lat,lng],
             icon = icone_avion,
-            popup=content_html,
+            popup=popup_objet,
             tooltip=f"Vol {callsign}"
         ).add_to(fg_planes)
 
