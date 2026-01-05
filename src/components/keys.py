@@ -1,19 +1,55 @@
 from dash import html
 
 def render(df):
-    # Style des cartes (petits rectangles)
-    card_style = {
-        'background': 'white',
-        'borderRadius': '5px',
-        'padding': '15px',
-        'margin': '10px',
-        'boxShadow': '2px 2px 5px rgba(0,0,0,0.1)',
-        'textAlign': 'center',
-        'flex': '1' # Pour qu'ils prennent toute la largeur dispo
+    # Style du conteneur : vertical (column) avec de l'espace entre les cartes
+    container_style = {
+        'display': 'flex',
+        'flexDirection': 'column',
+        'gap': '15px',          # Espace entre les blocs
+        'padding': '5px 0'     # Petit padding haut/bas
     }
-    
+
+    # Fonction pour générer une carte KPI avec dégradé
+    def create_kpi_card(title, value, gradient_colors):
+        return html.Div([
+            # Le Titre (en haut, petit, blanc transparent)
+            html.P(title, style={
+                'color': 'rgba(255, 255, 255, 0.7)', 
+                'fontSize': '11px', 
+                'textTransform': 'uppercase', 
+                'margin': '0',
+                'letterSpacing': '1px'
+            }),
+            # La Valeur (au centre, en gros)
+            html.H2(value, style={
+                'color': 'white', 
+                'fontSize': '26px', 
+                'fontWeight': '900', 
+                'margin': '5px 0 0 0'
+            })
+        ], style={
+            # L'astuce du dégradé est ici (angle de 135 degrés)
+            'background': f'linear-gradient(135deg, {gradient_colors[0]}, {gradient_colors[1]})',
+            'borderRadius': '12px',
+            'padding': '50px',
+            'boxShadow': '0 4px 15px rgba(0, 0, 0, 0.4)', # Ombre portée pour le relief
+            'textAlign': 'center',
+            'minWidth': '120px',
+            'minHeight': '100px'
+        })
+
+    # On retourne la colonne de cartes
     return html.Div([
-        html.Div([html.H2("125"), html.P("Avions en vol")], style=card_style),
-        html.Div([html.H2("11 km"), html.P("Altitude Moyenne")], style=card_style),
-        html.Div([html.H2("850 km/h"), html.P("Vitesse Max")], style=card_style),
-    ], style={'display': 'flex', 'justifyContent': 'space-between', 'marginBottom': '20px'})
+        # Carte 1 : Bleu Électrique / Cyan
+        create_kpi_card("Vols Actifs", "125", ["#1d8cf8", "#33d9b2"]),
+        
+        # Carte 2 : Orange / Jaune
+        create_kpi_card("Altitude Moy.", "11 km", ["#ff5252", "#ffb142"]),
+        
+        # Carte 3 : Violet / Rose
+        create_kpi_card("Vitesse Max", "850 km/h", ["#706fd3", "#ff793f"]),
+        
+        # Carte 4 : (Optionnelle) Turquoise
+        create_kpi_card("Destinations", "42", ["#00d2d3", "#54a0ff"])
+        
+    ], style=container_style)
