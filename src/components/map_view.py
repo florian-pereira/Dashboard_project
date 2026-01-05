@@ -1,14 +1,16 @@
+
 import folium, branca 
 import pandas as pd
 import os
 import sys
 import math
+from dash import html
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from src.utils.clean_data import load_data
 
-def create_map_airports_plane():
+def render(df_traffic):
 
     #Lecture du fichier csv dans une dataframe
     df_airports = load_data("airports")
@@ -54,7 +56,7 @@ def create_map_airports_plane():
     for lat,lng,angle in zip(LATS_PLANE,LONGS_PLANE,ANGLE_AVION):
         content_html = f"""
             <div style="transform: rotate({angle}deg);">
-                <img src="avion_icone.png" style="width:30px; height:30px;">
+                <img src="/assets/avion_icone.png" style="width:30px; height:30px;">
             </div>
         """
         icone_avion = folium.DivIcon(
@@ -71,4 +73,23 @@ def create_map_airports_plane():
 
     folium.LayerControl().add_to(map)
 
-    map.save(outfile='aeroports_plane.html')
+    map_html = map.get_root().render()
+
+    # On retourne une Iframe qui contient le HTML de la map
+    return html.Div([
+    html.Iframe(
+        srcDoc=map_html,
+        style={
+            'width': '100%', 
+            'height': '600px', 
+            'border': 'none',
+            'borderRadius': '15px'  # <--- ARRONDIS SUR L'IFRAME
+        }
+    )
+], style={
+    'width': '100%', 
+    'borderRadius': '15px',     # <--- ARRONDIS SUR LE CADRE
+    'overflow': 'hidden',       # <--- INDISPENSABLE pour couper les coins
+    'boxShadow': '0 4px 20px rgba(0,0,0,0.5)'
+})
+
