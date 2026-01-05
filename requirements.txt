@@ -1,3 +1,47 @@
-pandas
-dash
-plotly
+Bottleneck @ file:///C:/b/abs_816hr2khp1/croot/bottleneck_1731058648110/work
+branca @ file:///C:/miniconda3/conda-bld/branca_1757934864049/work
+brotlicffi @ file:///C:/b/abs_f4lixvzmxt/croot/brotlicffi_1736183286104/work
+certifi @ file:///C:/miniconda3/conda-bld/certifi_1759786076776/work/certifi
+cffi @ file:///C:/miniconda3/conda-bld/cffi_1760098047237/work
+charset-normalizer @ file:///croot/charset-normalizer_1721748349566/work
+contourpy @ file:///C:/b/abs_f2u2o_8s9g/croot/contourpy_1732540071787/work
+cycler @ file:///tmp/build/80754af9/cycler_1637851556182/work
+folium @ file:///C:/miniconda3/conda-bld/folium_1758749963402/work
+fonttools @ file:///C:/miniconda3/conda-bld/fonttools_1759754888085/work
+geojson @ file:///home/conda/feedstock_root/build_artifacts/geojson_1734884856640/work
+geopandas @ file:///C:/b/abs_d6j7hncsaz/croot/geopandas-split_1755761514156/work
+idna @ file:///C:/b/abs_aad84bnnw5/croot/idna_1714398896795/work
+Jinja2 @ file:///C:/b/abs_920kup4e6u/croot/jinja2_1741711580669/work
+joblib @ file:///C:/miniconda3/conda-bld/joblib_1757926375805/work
+kiwisolver @ file:///C:/b/abs_faf90xet7a/croot/kiwisolver_1737040915779/work
+mapclassify @ file:///C:/b/abs_3be81h48sy/croot/mapclassify_1754553916412/work
+MarkupSafe @ file:///C:/b/abs_a0ma7ge0jc/croot/markupsafe_1738584052792/work
+matplotlib==3.10.6
+mkl-service==2.5.2
+mkl_fft @ file:///C:/b/abs_64riv3lfyn/croot/mkl_fft_1751310924052/work
+mkl_random @ file:///C:/b/abs_47jvsmau4j/croot/mkl_random_1751310922820/work
+narwhals==2.14.0
+networkx @ file:///C:/b/abs_6c02vx1ct4/croot/networkx_1756709289161/work
+numexpr @ file:///C:/b/abs_3buvfgcf6r/croot/numexpr_1755766488094/work
+numpy @ file:///C:/b/abs_81ri0q57xq/croot/numpy_and_numpy_base_1755590863635/work/dist/numpy-1.26.4-cp311-cp311-win_amd64.whl#sha256=af156afd482d0009c90438c87a9974684f1ae8a95663cd70990b263c322310ed
+packaging @ file:///C:/b/abs_f7t3vr2_lo/croot/packaging_1753775377650/work
+pandas @ file:///C:/miniconda3/conda-bld/pandas_1759822263352/work/dist/pandas-2.3.3-cp311-cp311-win_amd64.whl#sha256=6cc36ffe18be45df11aaf1bc4a62c61afd14f3236a1bf9f7f234fcdafbeb362b
+pillow @ file:///C:/b/abs_b50vowcrzo/croot/pillow_1738010273782/work
+plotly==6.5.0
+pycparser @ file:///C:/miniconda3/conda-bld/pycparser_1757496060165/work
+pyogrio @ file:///C:/b/abs_0cqzcfsv7r/croot/pyogrio_1741107177502/work
+pyparsing @ file:///C:/b/abs_40z8gyj9wi/croot/pyparsing_1731445739241/work
+pyproj @ file:///C:/b/abs_fdab5w83yy/croot/pyproj_1739284782126/work
+PySocks @ file:///C:/ci_311/pysocks_1676425991111/work
+python-dateutil @ file:///C:/b/abs_3au_koqnbs/croot/python-dateutil_1716495777160/work
+pytz @ file:///C:/b/abs_f8wdzeix0n/croot/pytz_1752135878094/work
+requests @ file:///C:/b/abs_f53smfvswb/croot/requests_1756709376206/work
+scikit-learn @ file:///C:/b/abs_45qemhn4lg/croot/scikit-learn_1753427401078/work
+scipy @ file:///C:/miniconda3/conda-bld/scipy_1759489070186/work/dist/scipy-1.16.2-cp311-cp311-win_amd64.whl#sha256=3508ab5841192f24b66c11b0873abf889a5df612a0308b4fe4e0fbf5abdaa6f9
+shapely @ file:///C:/b/abs_94jzvmea90/croot/shapely_1722533188926/work
+six @ file:///C:/b/abs_149wuyuo1o/croot/six_1744271521515/work
+threadpoolctl @ file:///C:/b/abs_def0dwqlft/croot/threadpoolctl_1719407816649/work
+tzdata @ file:///croot/python-tzdata_1746123641790/work
+urllib3 @ file:///C:/b/abs_393g1ayee_/croot/urllib3_1750775481226/work
+win-inet-pton @ file:///C:/ci_311/win_inet_pton_1676425458225/work
+xyzservices @ file:///C:/miniconda3/conda-bld/xyzservices_1758720212714/work
