@@ -19,13 +19,12 @@ def render():
 
     #Lecture du fichier csv dans une dataframe
     df_airports = load_data("airports")
-    df_airports_france = df_airports.query("origin_country == 'France'")
 
     # Extraction des colonnes nécessaires pour la boucle
-    LATS_PORTS = df_airports_france["Latitude"]
-    LONGS_PORTS = df_airports_france["Longitude"]
-    ROUTES = df_airports_france["Route_Count"]
-    NAME_PORTS = df_airports_france["Name"]
+    LATS_PORTS = df_airports["Latitude"]
+    LONGS_PORTS = df_airports["Longitude"]
+    ROUTES = df_airports["Route_Count"]
+    NAME_PORTS = df_airports["Name"]
 
     # --- CREATION DE LA CARTE ---
     # Initialisation des coordonnées, centrées sur la France
@@ -53,15 +52,16 @@ def render():
     # --- PREPARATION ET CHARGEMENT DES DONNEES DES AVIONS ---
     # Lecture du fichier csv des avions dans une dataframe
     df_plane = load_data("traffic")
+    df_plane_france = df_plane.query("origin_country == 'France'")
 
     # Extraction des colonnes nécessaires pour la boucle
-    LATS_PLANE = df_plane["latitude"]
-    LONGS_PLANE = df_plane["longitude"]
-    ANGLE_AVION = df_plane["true_track"]    # Cap de l'avion (0-360°)
-    CALLSIGNS = df_plane["callsign"]
-    VITESSE = df_plane["velocity_kmh"]
-    PAYS = df_plane["origin_country"]
-    ALTITUDE = df_plane["baro_altitude"]
+    LATS_PLANE = df_plane_france["latitude"]
+    LONGS_PLANE = df_plane_france["longitude"]
+    ANGLE_AVION = df_plane_france["true_track"]    # Cap de l'avion (0-360°)
+    CALLSIGNS = df_plane_france["callsign"]
+    VITESSE = df_plane_france["velocity_kmh"]
+    PAYS = df_plane_france["origin_country"]
+    ALTITUDE = df_plane_france["baro_altitude"]
 
     # --- AJOUT DE LA COUCHE AVIONS ---  
     fg_planes = folium.FeatureGroup(name="Avions en vol")
