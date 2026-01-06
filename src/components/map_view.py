@@ -19,12 +19,13 @@ def render():
 
     #Lecture du fichier csv dans une dataframe
     df_airports = load_data("airports")
+    df_airports_france = df_airports.query("origin_country == 'France'")
 
     # Extraction des colonnes nécessaires pour la boucle
-    LATS_PORTS = df_airports["Latitude"]
-    LONGS_PORTS = df_airports["Longitude"]
-    ROUTES = df_airports["Route_Count"]
-    NAME_PORTS = df_airports["Name"]
+    LATS_PORTS = df_airports_france["Latitude"]
+    LONGS_PORTS = df_airports_france["Longitude"]
+    ROUTES = df_airports_france["Route_Count"]
+    NAME_PORTS = df_airports_france["Name"]
 
     # --- CREATION DE LA CARTE ---
     # Initialisation des coordonnées, centrées sur la France
