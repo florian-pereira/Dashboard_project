@@ -24,7 +24,7 @@ def process_live_traffic():
         df = pd.read_csv(TRAFFIC_RAW_FILE)
 
         # On ne garde que les avions EN L'AIR
-        df = df[ (df['on_ground'] == False) & (df['baro_altitude'].notna()) & (df['origin_country'] == 'France')].copy()
+        df = df[ (df['on_ground'] == False) & (df['baro_altitude'].notna())].copy()
 
         #  Vitesse m/s en km/h
         if 'velocity' in df.columns:
