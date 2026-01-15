@@ -27,10 +27,13 @@ def layout():
                     style={'color': COLORS['text'], 'fontWeight': 'bold', 'marginBottom': '10px'}),
             
             html.Div([
-                html.H4("Vue d'ensemble et Surveillance", style={'color': COLORS['electric_blue'], 'marginBottom': '10px'}),
+                html.H4("Visualisation des flux et enjeux écologiques", style={'color': COLORS['electric_blue'], 'marginBottom': '10px'}),
                 html.P(
-                    "Interface de contrôle en temps réel. Suivez les trajectoires, analysez les données "
-                    "aéroportuaires et consultez les indicateurs de performance clés.",
+                    "Ce tableau de bord offre une vision en temps réel de l'activité aéronautique mondiale. "
+                    "Conçu dans un cadre académique, il dépasse la simple surveillance : il vise à illustrer "
+                    "la saturation du ciel et la pollution atmosphérique qui en découle. En croisant la densité "
+                    "du trafic avec sa répartition géographique, cet outil permet de mieux saisir l'ampleur "
+                    "de l'empreinte écologique laissée par le transport aérien.",
                     style={'color': COLORS['text_dim'], 'fontSize': '14px', 'margin': '0'}
                 )
             ], style={**CARD_STYLE, 'borderLeft': f'5px solid {COLORS["electric_blue"]}', 'paddingLeft': '30px', 'minHeight': '100px'})
@@ -45,7 +48,7 @@ def layout():
             ], style={
                 'width': '10%',           # Largeur cible
                 'minWidth': '10%',        # Sécurité : ne peut pas être écrasé par la map
-                'marginRight': '20px',    # Espace entre les chiffres et la map
+                #'marginRight': '20px',    # Espace entre les chiffres et la map
                 
                 # --- ÉTIREMENT VERTICAL ---
                 'display': 'flex',
@@ -80,6 +83,7 @@ def layout():
         ], style={
             'display': 'flex',        # Active Flexbox
             'flexDirection': 'row',   # Met côte à côte
+            'gap': '20px',               # Espace entre les colonnes
             'alignItems': 'stretch',  # FORCE les deux colonnes à avoir la MÊME HAUTEUR
             'width': '100%',
             'marginBottom': '20px'
