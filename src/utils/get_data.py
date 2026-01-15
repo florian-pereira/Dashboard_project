@@ -6,7 +6,6 @@ import os
 import sys
 
 # Permet de remonter à la racine pour trouver 'config.py'
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from config import (
@@ -87,7 +86,3 @@ def get_static_AeroportsRoads_data():
     except Exception as e:
         print(f" Erreur statique : {e}")
 
-#Test de la fonction
-if __name__ == "__main__":
-    get_live_traffic_data()
-    get_static_AeroportsRoads_data()

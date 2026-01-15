@@ -1,7 +1,8 @@
-import pandas as pd
+from dash import dcc, html
 import plotly.express as px
 import os 
 import sys
+import pandas as pd
 
 import plotly.io as pio
 
@@ -32,7 +33,8 @@ def get_continent(lat, lon):
     else:
         return "Inconnu"
 
-def histo1(df):
+def render():
+    df = load_data('traffic')
     if df is None or df.empty:
         print("Le DataFrame est vide ou non chargé.")
         return
@@ -75,9 +77,8 @@ def histo1(df):
         legend_title="Continents (GPS)"
     )
 
-    fig.show()
+    #fig.show()
 
-if __name__ == "__main__":
-    df_avions = load_data(dataset="traffic")
-    histo1(df_avions)
-    input("Graphique lancé. Appuyez sur Entrée pour fermer le script...")
+    return html.Div([
+        dcc.Graph(figure=fig)
+    ], style={'marginTop': '20px', 'padding': '10px', 'background': 'white'})
