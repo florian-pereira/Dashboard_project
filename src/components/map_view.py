@@ -29,8 +29,29 @@ def render():
     # --- CREATION DE LA CARTE ---
     # Initialisation des coordonnées, centrées sur la France
     coords = (46.539758, 2.430331)
+
     # Création de la carte avec un fond sombre (Dark Matter)
-    map = folium.Map(location=coords, tiles='Cartodb dark_matter', zoom_start=6)
+    map = folium.Map(location=coords, 
+                    tiles='Cartodb dark_matter', 
+                    zoom_start=6, 
+                    min_zoom=2, 
+                    max_bounds=True)
+
+    df_pollution = pd.read_csv("data/cleaned/annual-co-emissions-from-aviation.csv")
+    df_pollution_2024 = df_pollution.query("Year == 2024")
+
+    folium.Choropleth(
+        geo_data = "src/components/continents.json",
+        name = "Polution Atmosphérique",
+        data = df_pollution_2024,
+        columns = ["Entity","Total annual CO₂ emissions from aviation"],
+        key_on = "feature.properties.CONTINENT",
+        fill_color="YlOrRd",              # Yellow -> Orange -> Red (Plus c'est haut, plus c'est rouge)
+        fill_opacity=0.7,
+        line_opacity=0.2,
+        legend_name="Pollution (tonnes CO2)",
+        highlight=True,
+    ).add_to(map)
 
     # --- AJOUT DE LA COUCHE AEROPORTS ---
     fg_airports = folium.FeatureGroup(name="Aéroports")

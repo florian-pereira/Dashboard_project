@@ -24,6 +24,7 @@ def process_live_traffic():
         df = pd.read_csv(TRAFFIC_RAW_FILE)
 
         # On ne garde que les avions EN L'AIR
+
         df = df[ (df['on_ground'] == False) & (df['baro_altitude'].notna()) ].copy()
 
         df = df.dropna(subset=['latitude', 'longitude'])
