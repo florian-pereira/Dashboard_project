@@ -1,12 +1,15 @@
 from dash import Dash
 from src.pages.home import layout
-from src.utils.get_data import get_live_traffic_data
-from src.utils.clean_data import process_live_traffic, load_data
+from src.utils.get_data import get_live_traffic_data, get_static_AeroportsRoads_data
+from src.utils.clean_data import process_live_traffic, load_data, process_static_data
 
 # ÉTAPE 1 : Récupération (Génère traffic_raw.csv)
 get_live_traffic_data()
 # ÉTAPE 2 : Nettoyage (Lit traffic_raw.csv et génère traffic_cleaned.csv)
 process_live_traffic()
+get_static_AeroportsRoads_data()
+process_static_data()
+
         
 # ÉTAPE 3 : Chargement (Lit traffic_cleaned.csv pour Dash)
 df = load_data(dataset="traffic")

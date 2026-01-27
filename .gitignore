@@ -1,5 +1,14 @@
-data/raw/
-data/cleaned/
+#  On ignore tout dans data (y compris le dossier cleaned et raw)
+data/*
+
+#  On autorise explicitement le dossier 'raw' à être scanné
+!data/raw/
+
+# 3. On ignore tout dans le dossier 'raw'
+data/raw/*
+
+#  On fait l'exception finale pour le fichier fixe
+!data/raw/annual-co-emissions-from-aviation.csv
 
 __pycache__/
 *.pyc
