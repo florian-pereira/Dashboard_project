@@ -1,6 +1,44 @@
 from dash import html
+import pandas as pd
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from src.utils.clean_data import load_data
+
+def get_kpi_value():
+    """
+    Lit les CSV et calcule :
+    1. Nombre d'avions (Trafic)
+    2. Estimation CO2 (Trafic * facteur)
+    3. Top Aéroport 
+    """
+    #Nombre d'avions actuellement en vol
+    df_traffic = load_data("traffic")
+    count = len(df_traffic)
+    nb_plane = f"{count:,}".replace(",", " ")
+
+    #Pollution
+    df_pollution = pd.read_csv("data/cleaned/annual-co-emissions-from-aviation.csv")
+    df_world_pollution = df_pollution.query("Entity == 'World' and Year == 2024")
+    world_pollution = df_world_pollution["Total annual CO₂ emissions from aviation"].iloc[0]
+    total_pollution = f"{world_pollution:,} t".replace(","," ")
+
+    # Aéoroport qui possède le plus de routes (le plus "grand")
+    df_airport = load_data("airports")
+    index_airport_max = df_airport["Route_Count"].idxmax()
+    airport_max = df_airport.loc[index_airport_max]
+    name_airport_max = airport_max["Name"]
+    name = f"{name_airport_max}"
+
+
+
+    return nb_plane, total_pollution, name
+
 
 def render():
+
+    nb_plane, total_co2, name_airport= get_kpi_value()
     # --- STYLE DU CONTENEUR ---
     container_style = {
         'display': 'flex',
@@ -50,12 +88,12 @@ def render():
     # --- RETOUR DU LAYOUT ---
     return html.Div([
         # Carte 1 : Bleu
-        create_kpi_card("Vols Actifs", "125", ["#1d8cf8", "#33d9b2"]),
+        create_kpi_card("Vols Actifs", nb_plane , ["#1d8cf8", "#33d9b2"]),
         
         # Carte 2 : Orange
-        create_kpi_card("Altitude Moy.", "32k", ["#ff5252", "#ffb142"]),
+        create_kpi_card("Emission Co2", total_co2 , ["#ff5252", "#ffb142"]),
         
         # Carte 3 : Violet
-        create_kpi_card("Vitesse Max", "850", ["#706fd3", "#ff793f"]),
+        create_kpi_card("Plus grand aéroport", name_airport , ["#706fd3", "#ff793f"]),
         
     ], style=container_style)
