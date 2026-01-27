@@ -25,20 +25,16 @@ def get_kpi_value():
     total_pollution = f"{world_pollution:,} t".replace(","," ")
 
     # Aéoroport qui possède le plus de routes (le plus "grand")
-    df_airport = load_data("airports")
-    index_airport_max = df_airport["Route_Count"].idxmax()
-    airport_max = df_airport.loc[index_airport_max]
-    name_airport_max = airport_max["Name"]
-    name = f"{name_airport_max}"
+    max_altitude = df_traffic["baro_altitude"].max()
+    max = f"{max_altitude:,} m".replace(","," ")
 
 
-
-    return nb_plane, total_pollution, name
+    return nb_plane, total_pollution, max
 
 
 def render():
 
-    nb_plane, total_co2, name_airport= get_kpi_value()
+    nb_plane, total_co2, max_alt= get_kpi_value()
     # --- STYLE DU CONTENEUR ---
     container_style = {
         'display': 'flex',
@@ -94,6 +90,6 @@ def render():
         create_kpi_card("Emission Co2", total_co2 , ["#ff5252", "#ffb142"]),
         
         # Carte 3 : Violet
-        create_kpi_card("Plus grand aéroport", name_airport , ["#706fd3", "#ff793f"]),
+        create_kpi_card("Altitude max.", max_alt , ["#706fd3", "#ff793f"]),
         
     ], style=container_style)
