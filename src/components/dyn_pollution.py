@@ -1,11 +1,10 @@
 import plotly.express as px
-import plotly.io as pio
 import os
 import pandas as pd
 import numpy as np
 from dash import dcc, html
 
-
+# --- 1. LES FONCTIONS UTILITAIRES (Restent en dehors) ---
 def get_continent_mapping():
     mapping = {
         'Asia': [
@@ -62,153 +61,156 @@ def get_continent_mapping():
             country_to_continent[country] = continent
     return country_to_continent
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-path_pollution = os.path.join(current_dir, '..', '..', 'data', 'cleaned', 'annual-co-emissions-from-aviation.csv')
-df = pd.read_csv(path_pollution)
-path_airports = os.path.join(current_dir, '..', '..', 'data', 'cleaned', 'airports_cleaned.csv')
-df_airports = pd.read_csv(path_airports)
+# --- 2. FONCTION DE CRÉATION DE LA FIGURE (Tout est encapsulé ici) ---
+def create_figure():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    path_pollution = os.path.join(current_dir, '..', '..', 'data', 'cleaned', 'annual-co-emissions-from-aviation.csv')
+    path_airports = os.path.join(current_dir, '..', '..', 'data', 'cleaned', 'airports_cleaned.csv')
+    
+    # Lecture
+    df = pd.read_csv(path_pollution)
+    df_airports = pd.read_csv(path_airports)
 
+    # Nettoyage
+    df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
+    df = df.dropna(subset=['Year'])
+    df['Year'] = df['Year'].astype(int)
 
+    # Calcul des routes 
+    df_routes = df_airports.groupby('Country')['Route_Count'].sum().reset_index()
+    df_routes.rename(columns={'Route_Count': 'Total_Routes'}, inplace=True)
 
-df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
-df = df.dropna(subset=['Year'])
-df['Year'] = df['Year'].astype(int)
+    # Mapping Continents
+    continent_map = get_continent_mapping()
+    df['continent'] = df['Entity'].map(continent_map)
+    blacklist = ['World', 'Africa', 'Asia', 'Europe', 'Oceania', 'South America', 'North America', 'European Union (28)']
+    df_clean = df[~df['Entity'].isin(blacklist)].copy()
+    df_clean = df_clean.dropna(subset=['continent'])
 
+    # Fusion
+    df_clean = pd.merge(df_clean, df_routes, left_on='Entity', right_on='Country', how='left')
+    df_clean = df_clean.dropna(subset=['Total_Routes'])
 
-#annee_max = df['Year'].max()
-#print(f"INFO: L'année maximale détectée dans le fichier CSV est : {annee_max}")
+    all_years = range(df_clean['Year'].min(), df_clean['Year'].max() + 1)
+    all_countries = df_clean['Entity'].unique()
 
-# Calcul des routes 
-df_routes = df_airports.groupby('Country')['Route_Count'].sum().reset_index()
-df_routes.rename(columns={'Route_Count': 'Total_Routes'}, inplace=True)
+    full_index = pd.MultiIndex.from_product([all_countries, all_years], names=['Entity', 'Year'])
 
-# Mapping Continents
-continent_map = get_continent_mapping()
-df['continent'] = df['Entity'].map(continent_map)
-blacklist = ['World', 'Africa', 'Asia', 'Europe', 'Oceania', 'South America', 'North America', 'European Union (28)']
-df_clean = df[~df['Entity'].isin(blacklist)].copy()
-df_clean = df_clean.dropna(subset=['continent'])
+    df_clean = df_clean.set_index(['Entity', 'Year']).reindex(full_index).reset_index()
 
-# Fusion
-df_clean = pd.merge(df_clean, df_routes, left_on='Entity', right_on='Country', how='left')
-df_clean = df_clean.dropna(subset=['Total_Routes'])
+    cols_to_fill = ['continent', 'Total_Routes', "Total annual CO₂ emissions from aviation"]
+    df_clean[cols_to_fill] = df_clean.groupby('Entity')[cols_to_fill].ffill()
+    df_clean = df_clean.dropna(subset=["Total annual CO₂ emissions from aviation"])
 
-all_years = range(df_clean['Year'].min(), df_clean['Year'].max() + 1)
-all_countries = df_clean['Entity'].unique()
+    col_pollution = "Total annual CO₂ emissions from aviation"
+    df_clean['Intensity_Per_Route'] = df_clean[col_pollution] / df_clean['Total_Routes']
 
-full_index = pd.MultiIndex.from_product([all_countries, all_years], names=['Entity', 'Year'])
+    # Traduction
+    traduction_continents = {
+        'Asia': 'Asie', 'Europe': 'Europe', 'Americas': 'Amériques',
+        'Africa': 'Afrique', 'Oceania': 'Océanie'
+    }
+    df_clean['continent'] = df_clean['continent'].replace(traduction_continents)
+    df_clean['Taille_Ajustee'] = np.sqrt(df_clean['Total_Routes'])
 
-df_clean = df_clean.set_index(['Entity', 'Year']).reindex(full_index).reset_index()
+    # GRAPHIQUE
+    neon_colors = {'Asie': '#bd93f9', 'Europe': '#ffb86c', 'Amériques': '#50fa7b', 'Afrique': '#ff79c6', 'Océanie': '#8be9fd'}
+    french_labels = {
+        "Intensity_Per_Route": "Intensité (CO₂ / Route)",
+        col_pollution: "Émissions Totales (Tonnes CO₂)",
+        "Total_Routes": "Nombre de Routes Aériennes",
+        "continent": "Continent", "Entity": "Pays", "Year": "Année"
+    }
 
+    # --- DÉBUT MODIFICATION ---
+    
+    # On raccourcit le titre et on réduit la taille du sous-titre HTML (font-size: 10px)
+    titre_graphe = "<b>PROFIL AVIATION</b><br><span style='font-size: 10px; color: #aaa;'>Intensité vs Pollution vs Trafic</span>"
 
-cols_to_fill = ['continent', 'Total_Routes', "Total annual CO₂ emissions from aviation"]
-df_clean[cols_to_fill] = df_clean.groupby('Entity')[cols_to_fill].ffill()
-df_clean = df_clean.dropna(subset=["Total annual CO₂ emissions from aviation"])
+    fig = px.scatter(df_clean, 
+                     x="Intensity_Per_Route", 
+                     y=col_pollution, 
+                     animation_frame="Year", 
+                     animation_group="Entity",
+                     facet_col="continent", 
+                     size="Taille_Ajustee", 
+                     size_max=40, # J'ai réduit un peu la taille max des bulles aussi (50 -> 40)
+                     hover_data={
+                         "Taille_Ajustee": False,
+                         "Total_Routes": True,
+                         "Entity": True,
+                         "continent": False,      
+                     },
+                     color="continent",
+                     color_discrete_map=neon_colors,
+                     hover_name="Entity",
+                     labels=french_labels,
+                     log_x=True, 
+                     log_y=True,
+                     range_x=[100, 500_000], 
+                     range_y=[5000, 1000_000_000], 
+                     title=titre_graphe
+                     )
 
+    # --- STYLE MINIMALISTE & PETIT ---
+    # --- STYLE MINIMALISTE & SANS LÉGENDE ---
+    fig.update_layout(
+        template='plotly_dark',
+        paper_bgcolor='#1a1a2e',
+        plot_bgcolor="#131322",
+        
+        # On supprime totalement la légende (les ronds de couleur à droite)
+        showlegend=False,  # <--- C'EST ICI QUE ÇA SE PASSE
 
-col_pollution = "Total annual CO₂ emissions from aviation"
-df_clean['Intensity_Per_Route'] = df_clean[col_pollution] / df_clean['Total_Routes']
+        # Réduction des marges
+        margin=dict(t=60, b=10, l=10, r=10),
+        
+        # Police Globale par défaut (petite)
+        font=dict(family="Segoe UI, sans-serif", size=10, color="#ffffff"),
+        
+        # Titre principal
+        title=dict(font=dict(size=14), x=0.05, y=0.95),
+    )
 
-# Traduction Française forcée
-traduction_continents = {
-    'Asia': 'Asie', 'Europe': 'Europe', 'Americas': 'Amériques',
-    'Africa': 'Afrique', 'Oceania': 'Océanie'
-}
-df_clean['continent'] = df_clean['continent'].replace(traduction_continents)
+    # Réduction de la taille des noms des continents (Annotations)
+    fig.for_each_annotation(lambda a: a.update(
+        text=a.text.split("=")[-1],
+        font=dict(size=11, color="white") # Taille des titres "Europe", "Asie"...
+    ))
 
-df_clean['Taille_Ajustee'] = np.sqrt(df_clean['Total_Routes'])
-#GRAPHIQUE
-neon_colors = {'Asie': '#bd93f9', 'Europe': '#ffb86c', 'Amériques': '#50fa7b', 'Afrique': '#ff79c6', 'Océanie': '#8be9fd'}
-french_labels = {
-    "Intensity_Per_Route": "Intensité (CO₂ / Route)",
-    col_pollution: "Émissions Totales (Tonnes CO₂)",
-    "Total_Routes": "Nombre de Routes Aériennes",
-    "continent": "Continent", "Entity": "Pays", "Year": "Année"
-}
+    # Configuration des Axes (Titres et Chiffres plus petits)
+    axis_style = dict(
+        showgrid=True, 
+        gridcolor='#333',
+        title_font=dict(size=10), # Taille "Intensité..."
+        tickfont=dict(size=8)     # Taille des chiffres "100", "1k"...
+    )
+    
+    fig.update_xaxes(**axis_style)
+    fig.update_yaxes(**axis_style)
 
-fig = px.scatter(df_clean, 
-                 x="Intensity_Per_Route", 
-                 y=col_pollution, 
-                 animation_frame="Year", 
-                 animation_group="Entity",
-                 facet_col="continent", 
+    fig.update_traces(marker=dict(sizemin=1, line=dict(width=0.5, color='white'), opacity=0.8))
+    
+    return fig
+    
 
-                 size="Taille_Ajustee", 
-                 size_max=50, 
-                 hover_data={
-                     "Taille_Ajustee": False, # On cache la valeur de calcul
-                     "Total_Routes": True,    # On montre la vraie valeur
-                     "Entity": True,
-                     "continent": False,      
-                 },
-
-                 color="continent",
-                 color_discrete_map=neon_colors,
-                 hover_name="Entity",
-                 labels=french_labels,
-                 log_x=True, 
-                 log_y=True,
-                 #range_x=[100, 200_000], 
-                 #range_y=[1000, 500_000_000],
-                 range_x=[100, 500_000], 
-                 range_y=[5000, 1000_000_000], 
-                 title="<b>PROFIL DE L'AVIATION MONDIALE</b><br><span style='font-size: 14px; color: #aaa;'>X = Intensité (émissions de CO₂ / route) | Y = Pollution Totale  | Taille = Nombre de routes par pays</span>"
-                 )
-
-# --- 8. STYLE ---
-fig.update_layout(
-    template='plotly_dark',
-    paper_bgcolor='#1a1a2e',
-    plot_bgcolor="#131322",
-    margin=dict(t=80, b=20, l=20, r=20),
-    legend=dict(orientation="h", y=1.1, title=None)
-)
-fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-fig.update_xaxes(showgrid=True, gridcolor='#333')
-fig.update_yaxes(showgrid=True, gridcolor='#333')
-
-fig.update_traces(marker=dict(sizemin=0.1, line=dict(width=0.5, color='white'), opacity=0.7))
-
-
-
-
-#////////////
-
+# --- 3. EXPORT POUR DASH ---
 def get_aviation_chart_component():
-    """
-    Cette fonction sera appelée par ton Dashboard principal.
-    Elle retourne le layout HTML/CSS prêt à l'emploi.
-    """
+    
+    # On génère la figure uniquement à la demande
+    fig = create_figure()
+    
     return html.Div([
         dcc.Graph(
             figure=fig, 
             config={'displayModeBar': False, 'staticPlot': False},
-            style={'width': '100%', 'height': '100%'} # Remplit le conteneur parent
+            style={'width': '100%', 'height': '100%'}
         )
     ], style={
         'height': '100%', 
         'width': '100%',
         'display': 'flex',
-        'alignItems': 'center',     # Centrage Vertical
-        'justifyContent': 'center', # Centrage Horizontal
+        'alignItems': 'center',     
+        'justifyContent': 'center', 
         'padding': '0'
     })
-
-
-
-
-fig.update_layout(
-    template='plotly_dark',
-    paper_bgcolor='#1a1a2e',
-    plot_bgcolor="#131322",
-    margin=dict(t=80, b=20, l=20, r=20),
-    legend=dict(orientation="h", y=1.1, title=None),
-    showlegend=False
-)
-fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-fig.update_xaxes(showgrid=True, gridcolor='#333')
-fig.update_yaxes(showgrid=True, gridcolor='#333')
-
-fig.update_traces(marker=dict(sizemin=4, line=dict(width=0.5, color='white'), opacity=0.7))
-
-pio.write_html(fig, file='pollution_final_fixed_years.html', auto_open=True, include_plotlyjs='cdn')
