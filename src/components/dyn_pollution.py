@@ -89,9 +89,9 @@ blacklist = ['World', 'Africa', 'Asia', 'Europe', 'Oceania', 'South America', 'N
 df_clean = df[~df['Entity'].isin(blacklist)].copy()
 df_clean = df_clean.dropna(subset=['continent'])
 
-# Fusion
 df_clean = pd.merge(df_clean, df_routes, left_on='Entity', right_on='Country', how='left')
 df_clean = df_clean.dropna(subset=['Total_Routes'])
+df_clean = df_clean[df_clean['Total_Routes'] > 0] # Sécurité supplémentaire
 
 all_years = range(df_clean['Year'].min(), df_clean['Year'].max() + 1)
 all_countries = df_clean['Entity'].unique()
@@ -117,6 +117,8 @@ traduction_continents = {
 df_clean['continent'] = df_clean['continent'].replace(traduction_continents)
 
 df_clean['Taille_Ajustee'] = np.sqrt(df_clean['Total_Routes'])
+#df_clean['Taille_Ajustee'] = df_clean['Total_Routes']
+
 #GRAPHIQUE
 neon_colors = {'Asie': '#bd93f9', 'Europe': '#ffb86c', 'Amériques': '#50fa7b', 'Afrique': '#ff79c6', 'Océanie': '#8be9fd'}
 french_labels = {
@@ -134,11 +136,11 @@ fig = px.scatter(df_clean,
                  facet_col="continent", 
 
                  size="Taille_Ajustee", 
-                 size_max=50, 
+                 size_max=45, 
                  hover_data={
                      "Taille_Ajustee": False, # On cache la valeur de calcul
                      "Total_Routes": True,    # On montre la vraie valeur
-                     "Entity": True,
+                     "Entity": False,
                      "continent": False,      
                  },
 
@@ -148,11 +150,11 @@ fig = px.scatter(df_clean,
                  labels=french_labels,
                  log_x=True, 
                  log_y=True,
-                 #range_x=[100, 200_000], 
-                 #range_y=[1000, 500_000_000],
-                 range_x=[100, 500_000], 
-                 range_y=[5000, 1000_000_000], 
-                 title="<b>PROFIL DE L'AVIATION MONDIALE</b><br><span style='font-size: 14px; color: #aaa;'>X = Intensité (émissions de CO₂ / route) | Y = Pollution Totale  | Taille = Nombre de routes par pays</span>"
+                 #range_x=[1000, 50_000], 
+                 #range_y=[20000, 300_000_000],
+                 range_x=[500, 70_000], 
+                 range_y=[5000, 500_000_000], 
+                 title="<b>PROFIL DE L'AVIATION MONDIALE</b>"#<br><span style='font-size: 14px; color: #aaa;'>X = Intensité (émissions de CO₂ / route) | Y = Pollution Totale  | Taille = Nombre de routes par pays</span>"
                  )
 
 # --- 8. STYLE ---
@@ -167,7 +169,7 @@ fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 fig.update_xaxes(showgrid=True, gridcolor='#333')
 fig.update_yaxes(showgrid=True, gridcolor='#333')
 
-fig.update_traces(marker=dict(sizemin=0.1, line=dict(width=0.5, color='white'), opacity=0.7))
+fig.update_traces(marker=dict(sizemin=0.1, line=dict(width=0.5, color='white'), opacity=0.9))
 
 
 
