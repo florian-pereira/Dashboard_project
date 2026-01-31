@@ -138,7 +138,7 @@ fig = px.scatter(df_clean,
                  animation_group="Entity",
                  facet_col="continent", 
                  size="Taille_Ajustee", 
-                 size_max=45, 
+                 size_max=35, 
                  hover_data={
                      "Taille_Ajustee": False, 
                      "Total_Routes": True,  
