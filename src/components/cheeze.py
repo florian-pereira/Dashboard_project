@@ -53,12 +53,6 @@ def get_continent(lat, lon):
 
 
 def render(df=None):
-    """
-    Génère le layout HTML contenant le Donut Chart.
-
-    Args:
-        df (pd.DataFrame, optional): DataFrame contenant les données 'latitude' et 'longitude'.
-    """
     if df is None:
         try:
             sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))

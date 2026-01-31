@@ -19,7 +19,6 @@ import pandas as pd
 import numpy as np
 from dash import dcc, html
 
-# --- 1. FONCTIONS UTILITAIRES ---
 def get_continent_mapping():
     mapping = {
         'Asia': [
@@ -76,7 +75,6 @@ def get_continent_mapping():
             country_to_continent[country] = continent
     return country_to_continent
 
-# --- 2. CHARGEMENT ET TRAITEMENT DES DONNÉES ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
 path_pollution = os.path.join(current_dir, '..', '..', 'data', 'cleaned', 'annual-co-emissions-from-aviation.csv')
 path_airports = os.path.join(current_dir, '..', '..', 'data', 'cleaned', 'airports_cleaned.csv')
@@ -88,11 +86,9 @@ df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
 df = df.dropna(subset=['Year'])
 df['Year'] = df['Year'].astype(int)
 
-# Calcul des routes 
 df_routes = df_airports.groupby('Country')['Route_Count'].sum().reset_index()
 df_routes.rename(columns={'Route_Count': 'Total_Routes'}, inplace=True)
 
-# Mapping Continents
 continent_map = get_continent_mapping()
 df['continent'] = df['Entity'].map(continent_map)
 blacklist = ['World', 'Africa', 'Asia', 'Europe', 'Oceania', 'South America', 'North America', 'European Union (28)']
@@ -103,7 +99,6 @@ df_clean = pd.merge(df_clean, df_routes, left_on='Entity', right_on='Country', h
 df_clean = df_clean.dropna(subset=['Total_Routes'])
 df_clean = df_clean[df_clean['Total_Routes'] > 0] 
 
-# Création de l'index complet (Pays x Années) pour une animation fluide
 all_years = range(df_clean['Year'].min(), df_clean['Year'].max() + 1)
 all_countries = df_clean['Entity'].unique()
 full_index = pd.MultiIndex.from_product([all_countries, all_years], names=['Entity', 'Year'])
@@ -114,24 +109,20 @@ cols_to_fill = ['continent', 'Total_Routes', "Total annual CO₂ emissions from 
 df_clean[cols_to_fill] = df_clean.groupby('Entity')[cols_to_fill].ffill()
 df_clean = df_clean.dropna(subset=["Total annual CO₂ emissions from aviation"])
 
-# --- IMPORTANT : Conversion en Entier pour l'affichage propre ---
 df_clean['Total_Routes'] = df_clean['Total_Routes'].astype(int)
-# ---------------------------------------------------------------
+
 
 col_pollution = "Total annual CO₂ emissions from aviation"
 df_clean['Intensity_Per_Route'] = df_clean[col_pollution] / df_clean['Total_Routes']
 
-# Traduction Française
 traduction_continents = {
     'Asia': 'Asie', 'Europe': 'Europe', 'Americas': 'Amériques',
     'Africa': 'Afrique', 'Oceania': 'Océanie'
 }
 df_clean['continent'] = df_clean['continent'].replace(traduction_continents)
 
-# Calcul pour la taille (Racine carrée pour le visuel)
 df_clean['Taille_Ajustee'] = np.sqrt(df_clean['Total_Routes'])
 
-# --- 3. CONFIGURATION DU GRAPHIQUE ---
 neon_colors = {'Asie': '#bd93f9', 'Europe': '#ffb86c', 'Amériques': '#50fa7b', 'Afrique': '#ff79c6', 'Océanie': '#8be9fd'}
 french_labels = {
     "Intensity_Per_Route": "Intensité (CO₂ / Route)",
@@ -146,11 +137,11 @@ fig = px.scatter(df_clean,
                  animation_frame="Year", 
                  animation_group="Entity",
                  facet_col="continent", 
-                 size="Taille_Ajustee", # Utilise la racine carrée pour le dessin
+                 size="Taille_Ajustee", 
                  size_max=45, 
                  hover_data={
-                     "Taille_Ajustee": False, # Cache la racine carrée
-                     "Total_Routes": True,    # Montre la vraie valeur (Entier)
+                     "Taille_Ajustee": False, 
+                     "Total_Routes": True,  
                      "Entity": True,
                      "continent": False,      
                  },
@@ -165,7 +156,6 @@ fig = px.scatter(df_clean,
                  title="<b>PROFIL DE L'AVIATION MONDIALE</b>"
                  )
 
-# --- 4. STYLE GENERAL ---
 fig.update_layout(
     template='plotly_dark',
     paper_bgcolor='#1a1a2e',
@@ -180,25 +170,21 @@ fig.update_xaxes(showgrid=True, gridcolor='#333')
 fig.update_yaxes(showgrid=True, gridcolor='#333')
 
 
-# --- 5. APPLICATION DES INFOBULLES (SUR TOUTES LES IMAGES) ---
 
-# Définition du modèle HTML
 mon_hovertemplate = (
     "<b>%{hovertext}</b><br>" +
     "<br>" +
     "Intensité: %{x:,.0f} (CO₂/Route)<br>" +
     "Émissions: %{y:.3s} Tonnes<br>" +
-    "Routes: %{customdata[0]:.0f}<br>" +  # :.0f assure qu'on n'a pas de virgule
+    "Routes: %{customdata[0]:.0f}<br>" +  
     "<extra></extra>"
 )
 
-# A. Appliquer à la vue principale (1ère année)
 fig.update_traces(
     hovertemplate=mon_hovertemplate,
     marker=dict(sizemin=0.1, line=dict(width=0.5, color='white'), opacity=0.9)
 )
 
-# B. Appliquer à toutes les images de l'animation
 for frame in fig.frames:
     for data in frame.data:
         data.hovertemplate = mon_hovertemplate
@@ -207,7 +193,6 @@ for frame in fig.frames:
         data.marker.opacity = 0.9
 
 
-# --- 6. EXPORT / DASH ---
 def get_aviation_chart_component():
     return html.Div([
         dcc.Graph(
