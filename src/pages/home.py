@@ -1,5 +1,6 @@
-from dash import html
-from src.components import keys, map_view, charts, cheeze
+from dash import html, dcc
+# J'ai ajouté 'aviation_chart' à la liste des imports
+from src.components import keys, map_view, charts, cheeze, dyn_pollution
 
 COLORS = {
     'background': '#1e1e2f',
@@ -21,6 +22,9 @@ CARD_STYLE = {
 def layout():
     return html.Div([
         
+        # --- 0. TIMERS (Pour le temps réel) ---
+        dcc.Interval(id='interval-component', interval=60*1000, n_intervals=0),
+
         # --- 1. INTRODUCTION (En-tête) ---
         html.Div([
             html.H1("Trafic Aérien", 
@@ -40,7 +44,6 @@ def layout():
         ], style={'width': '100%', 'marginBottom': '20px'}),
 
         # --- 2. ZONE PRINCIPALE (LIGNE DU MILIEU) ---
-        # J'ai ajouté 'display': 'flex' ici pour que les 3 blocs soient côte à côte
         html.Div([
             
             # COL 1 : KPIs (10%)
@@ -56,7 +59,7 @@ def layout():
 
             # COL 2 : MAP (60%)
             html.Div([
-                map_view.render()
+                map_view.render() # Si render() renvoie un Graph direct, c'est bon. Sinon attention aux IDs.
             ], style={
                 'width': '60%',           
                 'minWidth': '0',          
@@ -64,10 +67,10 @@ def layout():
                 'borderRadius': '12px'    
             }),
 
-            # COL 3 : CAMEMBERT + TEXTE (Reste de la place)
+            # COL 3 : CAMEMBERT + TEXTE (28%)
             html.Div([
                 
-                # BLOC HAUT : Le graphique Camembert (75%)
+                # BLOC HAUT : Le graphique Camembert
                 html.Div([
                     cheeze.render()
                 ], style={
@@ -79,7 +82,7 @@ def layout():
                     'position': 'relative'
                 }),
 
-                # BLOC BAS : Le Texte Explicatif (25%)
+                # BLOC BAS : Le Texte Explicatif
                 html.Div([
                     html.H5("Note Méthodologique", 
                             style={
@@ -128,29 +131,49 @@ def layout():
                 'display': 'flex',
                 'flexDirection': 'column', 
                 'gap': '20px',             
-                'width': '28%', # J'ai mis une largeur explicite pour équilibrer (10+60+28+gap = ~100)
+                'width': '28%', 
                 'height': '100%'           
             })
 
         ], style={
-            'display': 'flex',        # <--- INDISPENSABLE pour l'alignement horizontal
-            'flexDirection': 'row',   # <--- INDISPENSABLE
-            'gap': '20px',            # Espace entre les colonnes
-            'height': '550px',        # Hauteur fixe pour forcer la map et le camembert à avoir la même taille
+            'display': 'flex',        
+            'flexDirection': 'row',   
+            'gap': '20px',            
+            'height': '550px',        
             'marginBottom': '20px',
             'width': '100%'
         }),
 
-        # --- 3. ZONE BASSE (CHARTS) ---
+        # --- 3. ZONE BASSE (CHARTS CÔTE À CÔTE) ---
         html.Div([
+            
+            # Bloc Gauche (Graphique existant) - 50%
             html.Div([
                 charts.render()
             ], style={
                 **CARD_STYLE, 
-                'width': '50%', # J'ai remis 100% car 50% ferait bizarre tout seul à gauche
+                'width': '40%', 
+                'marginBottom': '0', # On enlève la marge bas pour l'alignement flex
                 'boxSizing': 'border-box'
+            }),
+
+            # Bloc Droite (NOUVEAU : Profil Aviation Mondiale) - 50%
+            html.Div([
+                dyn_pollution.get_aviation_chart_component()
+            ], style={
+                **CARD_STYLE,
+                'width': '60%',
+                'marginBottom': '0',
+                'boxSizing': 'border-box',
+                'overflow': 'hidden' # Pour éviter que le graph ne dépasse
             })
-        ])
+
+        ], style={
+            'display': 'flex',      # Active l'alignement horizontal
+            'flexDirection': 'row', 
+            'gap': '20px',          # Espace entre les deux graphiques
+            'width': '100%'
+        })
 
     ], style={
         'padding': '30px', 

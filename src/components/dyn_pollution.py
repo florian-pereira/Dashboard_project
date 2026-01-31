@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from dash import dcc, html
 
-
+# --- 1. FONCTIONS UTILITAIRES ---
 def get_continent_mapping():
     mapping = {
         'Asia': [
@@ -62,21 +62,17 @@ def get_continent_mapping():
             country_to_continent[country] = continent
     return country_to_continent
 
+# --- 2. CHARGEMENT ET TRAITEMENT DES DONNÉES ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
 path_pollution = os.path.join(current_dir, '..', '..', 'data', 'cleaned', 'annual-co-emissions-from-aviation.csv')
-df = pd.read_csv(path_pollution)
 path_airports = os.path.join(current_dir, '..', '..', 'data', 'cleaned', 'airports_cleaned.csv')
+
+df = pd.read_csv(path_pollution)
 df_airports = pd.read_csv(path_airports)
-
-
 
 df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
 df = df.dropna(subset=['Year'])
 df['Year'] = df['Year'].astype(int)
-
-
-#annee_max = df['Year'].max()
-#print(f"INFO: L'année maximale détectée dans le fichier CSV est : {annee_max}")
 
 # Calcul des routes 
 df_routes = df_airports.groupby('Country')['Route_Count'].sum().reset_index()
@@ -91,35 +87,37 @@ df_clean = df_clean.dropna(subset=['continent'])
 
 df_clean = pd.merge(df_clean, df_routes, left_on='Entity', right_on='Country', how='left')
 df_clean = df_clean.dropna(subset=['Total_Routes'])
-df_clean = df_clean[df_clean['Total_Routes'] > 0] # Sécurité supplémentaire
+df_clean = df_clean[df_clean['Total_Routes'] > 0] 
 
+# Création de l'index complet (Pays x Années) pour une animation fluide
 all_years = range(df_clean['Year'].min(), df_clean['Year'].max() + 1)
 all_countries = df_clean['Entity'].unique()
-
 full_index = pd.MultiIndex.from_product([all_countries, all_years], names=['Entity', 'Year'])
 
 df_clean = df_clean.set_index(['Entity', 'Year']).reindex(full_index).reset_index()
-
 
 cols_to_fill = ['continent', 'Total_Routes', "Total annual CO₂ emissions from aviation"]
 df_clean[cols_to_fill] = df_clean.groupby('Entity')[cols_to_fill].ffill()
 df_clean = df_clean.dropna(subset=["Total annual CO₂ emissions from aviation"])
 
+# --- IMPORTANT : Conversion en Entier pour l'affichage propre ---
+df_clean['Total_Routes'] = df_clean['Total_Routes'].astype(int)
+# ---------------------------------------------------------------
 
 col_pollution = "Total annual CO₂ emissions from aviation"
 df_clean['Intensity_Per_Route'] = df_clean[col_pollution] / df_clean['Total_Routes']
 
-# Traduction Française forcée
+# Traduction Française
 traduction_continents = {
     'Asia': 'Asie', 'Europe': 'Europe', 'Americas': 'Amériques',
     'Africa': 'Afrique', 'Oceania': 'Océanie'
 }
 df_clean['continent'] = df_clean['continent'].replace(traduction_continents)
 
+# Calcul pour la taille (Racine carrée pour le visuel)
 df_clean['Taille_Ajustee'] = np.sqrt(df_clean['Total_Routes'])
-#df_clean['Taille_Ajustee'] = df_clean['Total_Routes']
 
-#GRAPHIQUE
+# --- 3. CONFIGURATION DU GRAPHIQUE ---
 neon_colors = {'Asie': '#bd93f9', 'Europe': '#ffb86c', 'Amériques': '#50fa7b', 'Afrique': '#ff79c6', 'Océanie': '#8be9fd'}
 french_labels = {
     "Intensity_Per_Route": "Intensité (CO₂ / Route)",
@@ -134,71 +132,26 @@ fig = px.scatter(df_clean,
                  animation_frame="Year", 
                  animation_group="Entity",
                  facet_col="continent", 
-
-                 size="Taille_Ajustee", 
+                 size="Taille_Ajustee", # Utilise la racine carrée pour le dessin
                  size_max=45, 
                  hover_data={
-                     "Taille_Ajustee": False, # On cache la valeur de calcul
-                     "Total_Routes": True,    # On montre la vraie valeur
-                     "Entity": False,
+                     "Taille_Ajustee": False, # Cache la racine carrée
+                     "Total_Routes": True,    # Montre la vraie valeur (Entier)
+                     "Entity": True,
                      "continent": False,      
                  },
-
                  color="continent",
                  color_discrete_map=neon_colors,
                  hover_name="Entity",
                  labels=french_labels,
                  log_x=True, 
                  log_y=True,
-                 #range_x=[1000, 50_000], 
-                 #range_y=[20000, 300_000_000],
-                 range_x=[500, 70_000], 
-                 range_y=[5000, 500_000_000], 
-                 title="<b>PROFIL DE L'AVIATION MONDIALE</b>"#<br><span style='font-size: 14px; color: #aaa;'>X = Intensité (émissions de CO₂ / route) | Y = Pollution Totale  | Taille = Nombre de routes par pays</span>"
+                 range_x=[1000, 50_000], 
+                 range_y=[20000, 300_000_000],
+                 title="<b>PROFIL DE L'AVIATION MONDIALE</b>"
                  )
 
-# --- 8. STYLE ---
-fig.update_layout(
-    template='plotly_dark',
-    paper_bgcolor='#1a1a2e',
-    plot_bgcolor="#131322",
-    margin=dict(t=80, b=20, l=20, r=20),
-    legend=dict(orientation="h", y=1.1, title=None)
-)
-fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-fig.update_xaxes(showgrid=True, gridcolor='#333')
-fig.update_yaxes(showgrid=True, gridcolor='#333')
-
-fig.update_traces(marker=dict(sizemin=0.1, line=dict(width=0.5, color='white'), opacity=0.9))
-
-
-
-
-#////////////
-
-def get_aviation_chart_component():
-    """
-    Cette fonction sera appelée par ton Dashboard principal.
-    Elle retourne le layout HTML/CSS prêt à l'emploi.
-    """
-    return html.Div([
-        dcc.Graph(
-            figure=fig, 
-            config={'displayModeBar': False, 'staticPlot': False},
-            style={'width': '100%', 'height': '100%'} # Remplit le conteneur parent
-        )
-    ], style={
-        'height': '100%', 
-        'width': '100%',
-        'display': 'flex',
-        'alignItems': 'center',     # Centrage Vertical
-        'justifyContent': 'center', # Centrage Horizontal
-        'padding': '0'
-    })
-
-
-
-
+# --- 4. STYLE GENERAL ---
 fig.update_layout(
     template='plotly_dark',
     paper_bgcolor='#1a1a2e',
@@ -207,10 +160,55 @@ fig.update_layout(
     legend=dict(orientation="h", y=1.1, title=None),
     showlegend=False
 )
+
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 fig.update_xaxes(showgrid=True, gridcolor='#333')
 fig.update_yaxes(showgrid=True, gridcolor='#333')
 
-fig.update_traces(marker=dict(sizemin=4, line=dict(width=0.5, color='white'), opacity=0.7))
 
+# --- 5. APPLICATION DES INFOBULLES (SUR TOUTES LES IMAGES) ---
+
+# Définition du modèle HTML
+mon_hovertemplate = (
+    "<b>%{hovertext}</b><br>" +
+    "<br>" +
+    "Intensité: %{x:,.0f} (CO₂/Route)<br>" +
+    "Émissions: %{y:.3s} Tonnes<br>" +
+    "Routes: %{customdata[0]:.0f}<br>" +  # :.0f assure qu'on n'a pas de virgule
+    "<extra></extra>"
+)
+
+# A. Appliquer à la vue principale (1ère année)
+fig.update_traces(
+    hovertemplate=mon_hovertemplate,
+    marker=dict(sizemin=0.1, line=dict(width=0.5, color='white'), opacity=0.9)
+)
+
+# B. Appliquer à toutes les images de l'animation
+for frame in fig.frames:
+    for data in frame.data:
+        data.hovertemplate = mon_hovertemplate
+        data.marker.line.width = 0.5
+        data.marker.line.color = 'white'
+        data.marker.opacity = 0.9
+
+
+# --- 6. EXPORT / DASH ---
+def get_aviation_chart_component():
+    return html.Div([
+        dcc.Graph(
+            figure=fig, 
+            config={'displayModeBar': False, 'staticPlot': False},
+            style={'width': '100%', 'height': '100%'}
+        )
+    ], style={
+        'height': '100%', 
+        'width': '100%',
+        'display': 'flex',
+        'alignItems': 'center',    
+        'justifyContent': 'center',
+        'padding': '0'
+    })
+
+# Génération HTML pour vérification
 pio.write_html(fig, file='pollution_final_fixed_years.html', auto_open=True, include_plotlyjs='cdn')
