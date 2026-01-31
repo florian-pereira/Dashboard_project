@@ -1,10 +1,19 @@
+"""
+Génération d'un histogramme interactif affichant la distribution des altitudes des avions.
+
+Ce module permet de :
+- Déterminer le continent approximatif d'un avion selon ses coordonnées (Lat/Lon).
+- Segmenter les données de trafic aérien par zone géographique.
+- Visualiser la répartition des altitudes via un histogramme empilé (Stacked Histogram).
+- S'intégrer dynamiquement dans un Dashboard Dash (mise à jour temps réel supportée).
+"""
+
 from dash import dcc, html
 import plotly.express as px
 import pandas as pd
 import os 
 import sys
 
-# Couleurs de ton thème (on les définit ici pour rester cohérent)
 COLORS = {
     'card_bg': '#27293d',
     'electric_blue': '#1d8cf8',
@@ -13,9 +22,13 @@ COLORS = {
 }
 
 def get_continent(lat, lon):
-    """Détermine le continent en fonction des coordonnées GPS"""
+    """
+    Détermine le continent d'appartenance basé sur des boîtes englobantes (Bounding Boxes).
+    Retourne 'Inconnu' si les coordonnées sont hors des zones définies ou manquantes.
+    """
     if pd.isna(lat) or pd.isna(lon):
         return "Inconnu"
+    
     if 35 <= lat <= 71 and -25 <= lon <= 45:
         return "Europe"
     elif 15 <= lat <= 72 and -170 <= lon <= -50:
@@ -31,20 +44,28 @@ def get_continent(lat, lon):
     else:
         return "Inconnu"
 
-def render(df=None): # Ajout du paramètre df pour le temps réel
-    # Si aucun df n'est passé (premier chargement), on charge le CSV
+
+def render(df=None):
+    """
+    Génère le layout HTML contenant le graphique Plotly.
+    
+    Args:
+        df (pd.DataFrame, optional): DataFrame contenant les données 'latitude', 'longitude' 
+                                     et 'baro_altitude'. Si None, tente de charger les données par défaut.
+    """
     if df is None:
-        from src.utils.clean_data import load_data 
-        df = load_data('traffic')
+        try:
+            from src.utils.clean_data import load_data 
+            df = load_data('traffic')
+        except ImportError:
+            return html.Div("Erreur: Module de données introuvable.", style={'color': 'red'})
         
     if df is None or df.empty:
         return html.Div("En attente de données...", style={'color': COLORS['text_dim']})
         
-    # 1. Traitement
     df['continent'] = df.apply(lambda row: get_continent(row['latitude'], row['longitude']), axis=1)
     df_plot = df[df['continent'] != "Inconnu"].copy()
 
-    # 2. Couleurs
     couleurs_map = {
         "Europe": "#1d8cf8",
         "Amérique du Nord": "#e14eca",
@@ -54,7 +75,6 @@ def render(df=None): # Ajout du paramètre df pour le temps réel
         "Océanie": "#344675"
     }
 
-    # 3. Création Graphique
     fig = px.histogram(
         df_plot, 
         x='baro_altitude', 
@@ -71,13 +91,11 @@ def render(df=None): # Ajout du paramètre df pour le temps réel
                       "Appareils: %{y}<extra></extra>"
     )
     
-    # 4. Design & Layout
     fig.update_layout(
         paper_bgcolor='rgba(0,0,0,0)', 
         plot_bgcolor='rgba(0,0,0,0)',
         font_color=COLORS['text'],
         
-        # Titre
         title={
             'text': "<b>Distribution des altitudes par zone géographique</b>",
             'y': 0.96,
@@ -86,7 +104,6 @@ def render(df=None): # Ajout du paramètre df pour le temps réel
             'yanchor': 'top'
         },
         
-        # Marges (t=110 pour laisser la place à la légende sous le titre)
         margin=dict(l=20, r=20, t=110, b=20),
         bargap=0.2,
         

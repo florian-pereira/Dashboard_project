@@ -1,3 +1,17 @@
+"""
+Génération d'un graphique animé (Scatter Plot) analysant l'empreinte carbone de l'aviation mondiale.
+
+Ce script croise les données d'émissions de CO₂ (Time Series) avec le volume de routes 
+aériennes par pays pour visualiser l'intensité polluante.
+
+Fonctionnalités :
+- Nettoyage et fusion des datasets (Pollution & Aéroports).
+- Calcul de l'intensité (CO₂ / Route) et mapping des continents.
+- Configuration avancée de Plotly (Animation, Faceting, Style Dark).
+- Correction des infobulles (Hovertemplate) pour supporter l'animation.
+- Export sous forme de composant Dash.
+"""
+
 import plotly.express as px
 import plotly.io as pio
 import os
@@ -211,4 +225,4 @@ def get_aviation_chart_component():
     })
 
 # Génération HTML pour vérification
-pio.write_html(fig, file='pollution_final_fixed_years.html', auto_open=True, include_plotlyjs='cdn')
+#pio.write_html(fig, file='pollution_final_fixed_years.html', auto_open=True, include_plotlyjs='cdn')
