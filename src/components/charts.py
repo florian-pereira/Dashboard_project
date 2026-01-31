@@ -40,50 +40,74 @@ def render(df=None): # Ajout du paramètre df pour le temps réel
     if df is None or df.empty:
         return html.Div("En attente de données...", style={'color': COLORS['text_dim']})
         
-    # 1. Traitement des continents
+    # 1. Traitement
     df['continent'] = df.apply(lambda row: get_continent(row['latitude'], row['longitude']), axis=1)
     df_plot = df[df['continent'] != "Inconnu"].copy()
 
-    # 2. Couleurs des continents adaptées au mode sombre (plus vibrantes)
+    # 2. Couleurs
     couleurs_map = {
-        "Europe": "#1d8cf8",         # Ton Electric Blue
-        "Amérique du Nord": "#e14eca", # Rose/Violet vif
-        "Amérique du Sud": "#00f2c3", # Turquoise
-        "Asie": "#ff8d72",           # Orange corail
-        "Afrique": "#fd5d93",        # Rouge/Rose
-        "Océanie": "#344675"         # Bleu nuit
+        "Europe": "#1d8cf8",
+        "Amérique du Nord": "#e14eca",
+        "Amérique du Sud": "#00f2c3",
+        "Asie": "#ff8d72",
+        "Afrique": "#fd5d93",
+        "Océanie": "#344675"
     }
 
-    # 3. Création de l'histogramme (obligatoire pour ta consigne !)
+    # 3. Création Graphique
     fig = px.histogram(
         df_plot, 
         x='baro_altitude', 
         nbins=40, 
         range_x=[0, 13000],
-        title="<b>Distribution des altitudes par zone géographique</b>",
         color='continent',
         color_discrete_map=couleurs_map,
         template="plotly_dark"
     )
+
+    fig.update_traces(
+        hovertemplate="<b>%{data.name}</b><br>" +
+                      "Altitude: %{x} m<br>" +
+                      "Appareils: %{y}<extra></extra>"
+    )
     
-    # 4. Ajustement ultra-précis du design pour ton thème
+    # 4. Design & Layout
     fig.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)', # Fond transparent pour voir le fond de la carte
-        plot_bgcolor='rgba(0,0,0,0)',  # Fond du graphique transparent
+        paper_bgcolor='rgba(0,0,0,0)', 
+        plot_bgcolor='rgba(0,0,0,0)',
         font_color=COLORS['text'],
-        title_font_size=18,
-        title_x=0.05,
-        margin=dict(l=20, r=20, t=60, b=20),
+        
+        # Titre
+        title={
+            'text': "<b>Distribution des altitudes par zone géographique</b>",
+            'y': 0.96,
+            'x': 0.05,
+            'xanchor': 'left',
+            'yanchor': 'top'
+        },
+        
+        # Marges (t=110 pour laisser la place à la légende sous le titre)
+        margin=dict(l=20, r=20, t=110, b=20),
         bargap=0.2,
+        
         xaxis=dict(gridcolor='#33334d', title="Altitude (mètres)"),
-        yaxis=dict(gridcolor='#33334d', title="Nombre d'appareils"),
-        legend=dict(bgcolor='rgba(0,0,0,0)')
+        yaxis=dict(gridcolor="#33334d", title="Nombre d'appareils"),
+        
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="left",
+            x=0,
+            bgcolor='rgba(0,0,0,0)',
+            title=None 
+        )
     )
 
     return html.Div([
         dcc.Graph(
             figure=fig, 
-            config={'displayModeBar': False} # On cache les outils Plotly pour un look plus clean
+            config={'displayModeBar': False}
         )
     ], style={
         'backgroundColor': COLORS['card_bg'], 
