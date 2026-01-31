@@ -115,9 +115,10 @@ def render(df=None):
             yanchor="bottom",
             y=1.02,
             xanchor="left",
-            x=0,
+            x=-0.05,
             bgcolor='rgba(0,0,0,0)',
-            title=None 
+            title=None,
+            font=dict(size=10)
         )
     )
 
