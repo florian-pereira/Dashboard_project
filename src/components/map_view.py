@@ -41,7 +41,7 @@ def render():
     df_pollution_2024 = df_pollution.query("Year == 2024")
 
     folium.Choropleth(
-        geo_data = "src/components/continents.json",
+        geo_data = "data/geo/continents.json",
         name = "Polution Atmosphérique",
         data = df_pollution_2024,
         columns = ["Entity","Total annual CO₂ emissions from aviation"],
