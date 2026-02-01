@@ -1,134 +1,127 @@
-# ✈️ SkyDash : Visualisation du Trafic Aérien & Infrastructures
+# ✈️ Dashboard Analyse Trafic Aérien & Impact Environnemental
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![Dash](https://img.shields.io/badge/Dash-2.0%2B-orange)
-![OpenData](https://img.shields.io/badge/Data-OpenSky-green)
+![ESIEE](https://img.shields.io/badge/École-ESIEE%20Paris-red)
 
 ## 📋 Description du Projet
 
-Ce projet a été réalisé dans le cadre de l'unité **"Le projet Data"** à l'ESIEE Paris. L'objectif est de développer un dashboard interactif permettant d'analyser le transport aérien sous deux angles :
+Ce projet a été réalisé dans le cadre de l'unité **"Projet Python"** à l'ESIEE Paris. L'objectif est de concevoir un tableau de bord analytique permettant de croiser les données de trafic aérien mondial avec leur impact écologique.
 
-1.  **Vision Dynamique (Temps Réel) :** Visualisation des avions en vol au-dessus de la France à l'instant T.
-2.  **Vision Structurelle (Statique) :** Analyse de la répartition et de l'importance des aéroports internationaux à travers le monde.
+Le dashboard dépasse la simple visualisation de positions : il propose une réflexion sur la saturation de l'espace aérien, l'inégalité de la répartition des flux (Nord vs Sud) et la corrélation directe avec les émissions de CO₂.
 
-L'application est construite en **Python** et utilise la librairie **Dash** (Plotly) pour les visualisations graphiques.
+---
 
-## 🎯 Fonctionnalités Clés
+## 🚀 User Guide (Guide Utilisateur)
 
-* **Carte Live (France) :** Localisation précise des avions, affichage du cap, de l'altitude et de la vitesse (Données API OpenSky).
-* **Carte Mondiale des Aéroports :** Visualisation des grands hubs internationaux filtrables par trafic.
-* **Statistiques :** Histogrammes dynamiques sur la répartition des altitudes et des types d'avions.
-* **Mise à jour automatique :** Le module de récupération de données permet de rafraîchir les positions sans redémarrer le serveur.
+### Prérequis
+*   Python 3.8 ou supérieur.
+*   Une connexion internet 
 
-## 💾 Données Utilisées
+### Installation
 
-Le projet s'appuie sur des données **Open Data** accessibles publiquement :
+1.  Clonez le dépôt :
+    ```bash
+    git clone https://github.com/votre-repo/dashboard-aviation.git
+    ```
 
-### 1. Données Dynamiques (Live)
-* **Source :** [OpenSky Network API](https://opensky-network.org)
-* **Utilisation :** Récupération des vecteurs d'état (Position, Vitesse, Altitude) pour les vols au-dessus de la France.
-* **Script :** `src/utils/get_data.py`
+2.  Installez les dépendances nécessaires :
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-### 2. Données Statiques (Infrastructure)
-* **Source :** [OurAirports / OpenFlights](https://davidmegginson.github.io/ourairports-data/)
-* **Utilisation :** Base de données des aéroports (Localisation, Code IATA, Type) pour l'analyse structurelle.
-* **Script :** Stocké dans `data/raw/` et nettoyé via `src/utils/clean_data.py`.
+### Lancement de l'Application
 
-## 🛠️ Architecture Technique
+Exécutez la commande suivante à la racine du projet :
+```bash
+python main.py
+```
 
-Le code respecte une architecture modulaire MVC (Modèle-Vue-Contrôleur) pour faciliter la maintenance et le travail collaboratif :
+Ouvrez ensuite votre navigateur à l'adresse indiquée 
+
+
+## 💾 Données (Data Sources)
+
+Le projet consolide plusieurs sources de données ouvertes pour garantir la précision des analyses :
+
+1.  **OpenSky Network** :
+    *   Données de trafic aérien en temps réel (ou snapshots récents).
+    *   Utilisé pour la cartographie des positions et l'analyse des altitudes.
+    *   *Script de récupération :* `src/utils/get_data.py`.
+
+2.  **Our World in Data (OWID)** :
+    *   Dataset : *Annual CO₂ emissions from aviation*.
+    *   Utilisé pour l'axe historique et la comparaison des empreintes carbones par pays.
+
+3.  **OpenFlights / OurAirports** :
+    *   Base de données statique des aéroports et des routes aériennes.
+    *   Permet le calcul de la densité des réseaux aériens (nombre de routes par pays).
+    *   *Fichiers bruts :* `data/raw/airports_raw.csv`, `traffic_raw.csv`.
+
+Les données brutes sont traitées et nettoyées via `src/utils/clean_data.py` pour être stockées dans `data/cleaned/`.
+
+---
+
+## 🛠️ Developer Guide
+
+### Architecture du Projet
+
+Le code respecte une structure modulaire pour séparer la logique de traitement de l'interface graphique.
 
 ```text
-data_project/
-├── main.py                  # Point d'entrée de l'application
-├── config.py                # Configuration globale (URLs, Chemins)
-├── data/                    # Stockage des données (Raw vs Cleaned)
-└── src/
-    ├── utils/               # Scripts backend (API, Nettoyage)
-    ├── components/          # Composants graphiques réutilisables
-    └── pages/               # Mises en page des différentes vues
+Dashboard_project/
+├── main.py                  # Point d'entrée unique (Lance le serveur Dash)
+├── config.py                # Variables globales (Chemins, Constantes)
+├── requirements.txt         # Liste des librairies Python
+├── data/                    # Stockage
+│   ├── raw/                 # Données brutes (sourcées)
+│   └── cleaned/             # Données nettoyées prêtes pour le Dash
+├── src/
+│   ├── components/          # Composents graphiques indépendants
+│   │   ├── charts.py        # Histogrammes (Altitudes)
+│   │   ├── cheeze.py        # Diagramme Camembert (Répartition Continents)
+│   │   ├── dyn_pollution.py # Scatter Plot Animé (Pollution vs Routes)
+│   │   ├── map_view.py      # Carte Folium/Plotly Mapbox
+│   │   └── keys.py          # Indicateurs Clés (KPIs)
+│   ├── pages/
+│   │   └── home.py          # Assemblage de la page principale (Layout)
+│   └── utils/               # Backend logique
+│       ├── get_data.py      # Scripts de fetch API
+│       └── clean_data.py    # Pipelines de nettoyage Pandas
+```
 
-1. La Racine (L'Administration du Projet)
-C'est le "quartier général". On y trouve les fichiers de configuration et le point de lancement.
 
-main.py (Le Chef d'Orchestre)
 
-Contenu : Il initialise l'application Dash, charge le style CSS (Bootstrap) et définit la structure globale (Barre de navigation + Contenu de la page).
+## 📊 Rapport d'Analyse
 
-Pourquoi ? Le prof a demandé de lancer le projet via python main.py. Ce fichier doit être court et propre. Il ne contient pas de calculs complexes, il se contente d'appeler les autres fichiers.
+À travers les différentes visualisations, ce dashboard met en lumière plusieurs tendances clés :
 
-config.py (Le Tableau de Bord)
+1.  **Inégalités Nord-Sud :**
+    *   La carte de densité et le diagramme circulaire montrent une domination du trafic en Europe et Amérique du Nord. Pour  l'Asie c'est un peu différent on voit bien que c'est l'endroit le plus pollué mais les restrictions gouvernementales et militaires en termes d'acces au informations sur les vols faussent les résultats.
+    *   L'Afrique et l'Amérique du Sud restent sous-représentées malgré leur superficie, soulignant une fracture infrastructurelle et économique.
 
-Contenu : Les variables globales : chemins des dossiers (DATA_DIR), URLs des API, clés secrètes si besoin.
+2.  **Corrélation Activité/Pollution :**
+    *   Le *Bubble Chart* animé (Pollution vs Routes) démontre que les pays ayant le plus de connexions aériennes (USA, Chine) sont logiquement les plus gros émetteurs.
+    *   L'animation temporelle révèle l'impact drastique du COVID-19 (2oche 2020-2021) avec un recul des émissions à des niveaux historiques, avant une reprise rapide dès 2022.
 
-Pourquoi ? Si demain l'URL de l'API change ou si tu changes d'ordinateur (Mac vs Windows), tu modifies juste une ligne ici au lieu de chercher dans 50 fichiers.
+3.  **Profils de Vol :**
+    *   L'histogramme des altitudes confirme le modèle standard de vol commercial : une concentration massive entre 9km et 12km (altitude de croisière optimale pour la consommation de carburant), distincte des petits porteurs volant à basse altitude.
 
-requirements.txt (La Liste de Courses)
+---
 
-Contenu : La liste des librairies (pandas, dash, etc.).
+## 👥 Répartition des Tâches
 
-Pourquoi ? Indispensable pour que le prof puisse installer ton projet sur sa machine.
+Killian : map.py, keys.py
+Theo : charts.py, cheeze.py, dyn_pollution.py
+Florian : home.py, clean et get_data, main.py
 
-.gitignore (Le Videur)
 
-Contenu : Liste des fichiers à ne pas envoyer sur GitHub (comme .venv).
+---
 
-Pourquoi ? Garder le dépôt propre et léger.
+## © Copyright & Licence
 
-2. Le Dossier data/ (Le Carburant)
-C'est ici que sont stockées les informations. Il est divisé en deux états.
+Ce projet a été développé à des fins pédagogiques à l'ESIEE Paris.
+Usage libre pour consultation. Toute réutilisation commerciale du code source nécessite l'accord des auteurs.
 
-data/raw/ (Le Brut)
-
-Contenu : Les fichiers CSV/JSON tels qu'ils sortent exactement de l'API ou du téléchargement.
-
-Pourquoi ? Si tu fais une erreur dans ton nettoyage, tu peux toujours revenir à la source originale sans avoir à re-télécharger. C'est ta sauvegarde de sécurité.
-
-data/cleaned/ (Le Propre)
-
-Contenu : Les fichiers CSV prêts à l'emploi (colonnes renommées, dates formatées, valeurs nulles supprimées).
-
-Pourquoi ? Le Dashboard doit être rapide. Il ne doit pas recalculer le nettoyage à chaque fois qu'un utilisateur clique. Il lit directement le fichier propre.
-
-3. Le Dossier src/utils/ (La Mécanique / Le Backend)
-C'est le moteur caché sous le capot. Ici, pas de graphiques, juste du code Python pur.
-
-get_data.py (Le Chasseur)
-
-Contenu : Le code qui se connecte à l'API OpenSky, télécharge les données et les écrit dans data/raw.
-
-Pourquoi ? C'est une exigence explicite du sujet. Il gère les problèmes de connexion Internet.
-
-clean_data.py (Le Nettoyeur)
-
-Contenu : Le code qui lit data/raw, fusionne les avions avec les aéroports, corrige les erreurs et sauvegarde dans data/cleaned.
-
-Pourquoi ? Pour séparer la récupération (Internet) du traitement (CPU).
-
-4. Le Dossier src/components/ (Les Briques LEGO)
-Ce sont des morceaux d'interface réutilisables.
-
-header.py / navbar.py
-
-Contenu : Le code de la barre de menu en haut.
-
-Pourquoi ? Si tu veux changer le titre du site, tu le fais ici une seule fois, et ça se met à jour sur toutes les pages.
-
-map_view.py (Exemple de composant)
-
-Contenu : La fonction qui génère la carte Plotly.
-
-Pourquoi ? Le code d'une carte est souvent long (50-100 lignes). Si tu le mets directement dans la page, le code devient illisible. On l'isole ici.
-
-5. Le Dossier src/pages/ (Les Écrans)
-C'est l'assemblage final que voit l'utilisateur.
-
-home.py
-
-Contenu : Importe la navbar, importe la carte mondiale depuis components, et les dispose à l'écran (html.Div, dbc.Row).
-
-france_live.py
-
-Contenu : La page spécifique pour la France.
-
-Pourquoi ? Dash permet de créer des applications "Multi-pages". Chaque fichier ici correspond à une URL différente (/home, /france).
+**Auteurs :** [Florian Pereira], [Killian Mauge], [Théo Petreco].
+*Année 2025-2026.*
