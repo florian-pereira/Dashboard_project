@@ -125,10 +125,11 @@ def render(df=None):
     return html.Div([
         dcc.Graph(
             figure=fig, 
-            config={'displayModeBar': False}
+            config={'displayModeBar': False},
+            style={'height': '100%', 'width': '100%'}
         )
     ], style={
-        'backgroundColor': COLORS['card_bg'], 
-        'borderRadius': '12px',
-        'padding': '10px'
+        'backgroundColor': 'transparent', 
+        'height': '100%',
+        'width': '100%'
     })

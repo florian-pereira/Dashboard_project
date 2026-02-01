@@ -13,6 +13,14 @@ from config import (
     AIRPORTS_RAW_FILE,  AIRPORTS_URL,
     ROUTES_RAW_FILE, ROUTES_URL)
 
+# Chemins des dossiers
+raw_path = "data/raw"
+cleaned_path = "data/cleaned"
+
+# Création automatique des dossiers s'ils n'existent pas
+os.makedirs(raw_path, exist_ok=True)
+os.makedirs(cleaned_path, exist_ok=True)
+
 
 # FONCTIONS DE RÉCUPÉRATION DE DONNÉES
 
@@ -21,7 +29,6 @@ def get_live_traffic_data():
     Récupère les avions en temps réel via l'API OpenSky.
     Sauvegarde les données brutes dans 'traffic_raw.csv'.
     """
-    print("[Connexion à OpenSky pour récupérer les données de trafic aérien...")
     
     # Paramètres pour cibler la l'Europe
     # l'API OpenSky demande des paramètres dans l'URL
@@ -60,10 +67,9 @@ def get_live_traffic_data():
 
 def get_static_AeroportsRoads_data():
 
-    print(" Téléchargement OpenFlights...")
     try:
         #Documentation : https://openflights.org/data pour les noms des colonnes (aireports et routes)
-        # ---  AÉROPORTS ---
+        # AÉROPORTS
         
         cols_airports = ["Airport ID", "Name", "City", "Country", "IATA", "ICAO", 
                          "Latitude", "Longitude", "Altitude", "Timezone", "DST", 
@@ -72,7 +78,7 @@ def get_static_AeroportsRoads_data():
         df_air.to_csv(AIRPORTS_RAW_FILE, index=False)
         print(f" Aéroports : {len(df_air)} lignes.")
 
-        # ---  ROUTES ---
+        # ROUTES
         cols_routes = ["Airline", "Airline ID", "Source Airport", "Source Airport ID", 
                        "Dest Airport", "Dest Airport ID", "Codeshare", "Stops", "Equipment"]
         
@@ -84,5 +90,5 @@ def get_static_AeroportsRoads_data():
         print(f" Routes : {len(df_routes)} lignes.")
         
     except Exception as e:
-        print(f" Erreur statique : {e}")
+        print(f" Erreur  : {e}")
 

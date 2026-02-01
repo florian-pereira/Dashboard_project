@@ -147,17 +147,92 @@ def layout():
         # --- 3. ZONE BASSE (CHARTS CÔTE À CÔTE) ---
         html.Div([
             
-            # Bloc Gauche (Graphique existant) - 50%
+            # Bloc Gauche (Graphique + Texte explicatif) - 40%
             html.Div([
-                charts.render()
+                
+                # BLOC HAUT : Le graphique histogramme
+                html.Div([
+                    charts.render()
+                ], style={
+                    'height': '350px',
+                    'backgroundColor': COLORS['card_bg'],
+                    'borderRadius': '12px',
+                    'padding': '10px',
+                    'overflow': 'hidden'
+                }),
+                
+                # BLOC BAS : Texte explicatif
+                html.Div([
+                    html.H5("Lecture des Graphiques", 
+                            style={
+                                'color': COLORS['electric_blue'], 
+                                'fontWeight': 'bold', 
+                                'marginBottom': '5px', 
+                                'marginTop': '0', 
+                                'fontSize': '12px'
+                            }),
+                    
+                    html.P(
+                        "Altitudes : La distribution des altitudes révèle deux pics. Le premier correspond à la phase de montée et descente, "
+                        "le second à l'altitude de croisière (9-12km). Les long-courriers privilégient les hautes altitudes pour réduire la consommation.",
+                        style={
+                            'color': COLORS['text_dim'], 
+                            'fontSize': '10px', 
+                            'marginBottom': '6px', 
+                            'lineHeight': '1.3',
+                            'textAlign': 'justify'
+                        }
+                    ),
+                    
+                    html.P(
+                        "Empreinte Carbone : Chaque bulle représente un pays positionné selon deux critères. "
+                        "L'axe horizontal indique l'intensité polluante, c'est-à-dire la quantité de CO₂ émise par route aérienne. "
+                        "L'axe vertical montre les émissions totales du pays. La taille des bulles reflète le nombre de routes aériennes. "
+                        "Ainsi, un pays situé en bas à gauche possède peu de liaisons et génère peu de pollution, comme les petites nations insulaires. "
+                        "À l'inverse, un pays en haut à droite cumule un réseau aérien dense et des émissions massives, à l'image des États-Unis ou de la Chine.",
+                        style={
+                            'color': COLORS['text_dim'], 
+                            'fontSize': '10px', 
+                            'marginBottom': '6px', 
+                            'lineHeight': '1.3',
+                            'textAlign': 'justify'
+                        }
+                    ),
+                    
+                    html.P(
+                        "Entre 1990 et 2019, on observe une progression constante des émissions portée par la mondialisation, "
+                        "l'essor du tourisme de masse et la multiplication des compagnies low-cost. Cette croissance s'interrompt brutalement "
+                        "en 2020-2021 avec la pandémie de COVID-19 : les fermetures de frontières et l'immobilisation des flottes provoquent "
+                        "une chute historique. Dès 2022, la reprise du trafic confirme la dépendance mondiale au transport aérien.",
+                        style={
+                            'color': COLORS['text_dim'],
+                            'fontSize': '10px', 
+                            'margin': '0', 
+                            'lineHeight': '1.3',
+                            'textAlign': 'justify'
+                        }
+                    )
+
+                ], style={
+                    'flex': '1',
+                    'backgroundColor': COLORS['card_bg'],
+                    'borderRadius': '12px',
+                    'padding': '12px',
+                    'display': 'flex',
+                    'flexDirection': 'column',
+                    'justifyContent': 'center'
+                })
+                
             ], style={
-                **CARD_STYLE, 
-                'width': '40%', 
-                'marginBottom': '0', # On enlève la marge bas pour l'alignement flex
+                'display': 'flex',
+                'flexDirection': 'column',
+                'gap': '15px',
+                'width': '40%',
+                'height': '100%',
                 'boxSizing': 'border-box'
             }),
 
-            # Bloc Droite (NOUVEAU : Profil Aviation Mondiale) - 50%
+            # Bloc Droite (NOUVEAU : Profil Aviation Mondiale) - 60%
             html.Div([
                 dyn_pollution.get_aviation_chart_component()
             ], style={
@@ -172,7 +247,8 @@ def layout():
             'display': 'flex',      # Active l'alignement horizontal
             'flexDirection': 'row', 
             'gap': '20px',          # Espace entre les deux graphiques
-            'width': '100%'
+            'width': '100%',
+            'height': '520px'       # Hauteur fixe pour la zone basse
         })
 
     ], style={

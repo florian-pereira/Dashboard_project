@@ -121,7 +121,7 @@ traduction_continents = {
 }
 df_clean['continent'] = df_clean['continent'].replace(traduction_continents)
 
-df_clean['Taille_Ajustee'] = np.sqrt(df_clean['Total_Routes'])
+df_clean['Taille_Ajustee'] = np.power(df_clean['Total_Routes'], 0.6)
 
 neon_colors = {'Asie': '#bd93f9', 'Europe': '#ffb86c', 'Amériques': '#50fa7b', 'Afrique': '#ff79c6', 'Océanie': '#8be9fd'}
 french_labels = {
@@ -138,7 +138,7 @@ fig = px.scatter(df_clean,
                  animation_group="Entity",
                  facet_col="continent", 
                  size="Taille_Ajustee", 
-                 size_max=35, 
+                 size_max=40, 
                  hover_data={
                      "Taille_Ajustee": False, 
                      "Total_Routes": True,  
@@ -153,21 +153,30 @@ fig = px.scatter(df_clean,
                  log_y=True,
                  range_x=[1000, 50_000], 
                  range_y=[20000, 300_000_000],
-                 title="<b>PROFIL DE L'AVIATION MONDIALE</b>"
+                 title="<b>EMPREINTE CARBONE DE L'AVIATION MONDIALE</b>"
                  )
 
 fig.update_layout(
     template='plotly_dark',
     paper_bgcolor='#1a1a2e',
     plot_bgcolor="#131322",
-    margin=dict(t=80, b=20, l=20, r=20),
+    margin=dict(t=80, b=60, l=20, r=20),  # b=60 pour laisser place au titre X global
     legend=dict(orientation="h", y=1.1, title=None),
     showlegend=False
 )
 
 fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-fig.update_xaxes(showgrid=True, gridcolor='#333')
+fig.update_xaxes(showgrid=True, gridcolor='#333', title=None)  # Supprime les titres X individuels
 fig.update_yaxes(showgrid=True, gridcolor='#333')
+
+# Ajoute un titre X unique et centré en bas
+fig.add_annotation(
+    text="Intensité (CO₂ / Route)",
+    xref="paper", yref="paper",
+    x=0.5, y=-0.15,
+    showarrow=False,
+    font=dict(size=12, color='white')
+)
 
 
 
@@ -176,7 +185,7 @@ mon_hovertemplate = (
     "<br>" +
     "Intensité: %{x:,.0f} (CO₂/Route)<br>" +
     "Émissions: %{y:.3s} Tonnes<br>" +
-    "Routes: %{customdata[0]:.0f}<br>" +  
+    "Routes: %{customdata[1]:,.0f}<br>" +  
     "<extra></extra>"
 )
 

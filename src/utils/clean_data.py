@@ -12,9 +12,8 @@ from config import (
 
 def process_live_traffic():
     """
-    Nettoie les données de trafic  (Avions).
+    Nettoie les données de trafic  (Avions)
     """
-    print("Nettoyage du Trafic Aérien...")
     
     if not os.path.exists(TRAFFIC_RAW_FILE):
         print(" Fichier introuvable. Lancer d'abord get_data.py.")
@@ -32,19 +31,7 @@ def process_live_traffic():
         if 'velocity' in df.columns:
             df['velocity_kmh'] = df['velocity'] * 3.6
         else:
-            df['velocity_kmh'] = 0
-        """
-        # Création de la colonne 'origin_category' 
-        # qui nous servira pour donner la couleur entre les avions Francais et internationaux.    
-        # fonction de tri des pays (France vs International)
-        def trier_pays(x):
-            if x == 'France':
-                return 'France'     # On garde France
-            else:
-                return 'International' # Tout le reste devient International
-
-        df['origin_category'] = df['origin_country'].apply(trier_pays)
-        """        
+            df['velocity_kmh'] = 0      
 
         #  On ne garde que les colonnes utiles :
         
@@ -65,7 +52,6 @@ def process_static_data():
     """
     Fusionne Aéroports et Routes pour calculer la taille des hubs.
     """
-    print(" Fusion Aéroports & Routes...")
     
     if not os.path.exists(AIRPORTS_RAW_FILE) or not os.path.exists(ROUTES_RAW_FILE):
         print(" Fichiers RAW introuvables (Airports ou Routes manquants).")
