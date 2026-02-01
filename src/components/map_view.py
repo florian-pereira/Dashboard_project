@@ -27,20 +27,20 @@ def render():
     Génère la carte et la retourne sous forme de composant Dash.
     """
 
-    # Je charge le fichier des aéroports
+    # On charge le fichier des aéroports
     df_airports = load_data("airports")
 
-    # Je recupere les colonnes dont j'ai besoin pour faire ma boucle
+    # On recupere les colonnes dont on a besoin pour faire la boucle
     LATS_PORTS = df_airports["Latitude"]
     LONGS_PORTS = df_airports["Longitude"]
     ROUTES = df_airports["Route_Count"]
     NAME_PORTS = df_airports["Name"]
 
-    # --- CREATION DE LA CARTE ---
+    # CREATION DE LA CARTE
     # Coordonnées de départ (centré sur la France)
     coords = (46.539758, 2.430331)
 
-    # Je crée la carte, j'ai mis un fond sombre c'est plus joli
+    # On crée la carte avec un fond sombre c'est plus joli
     map = folium.Map(location=coords, 
                     tiles='Cartodb dark_matter', 
                     zoom_start=6, 
@@ -63,7 +63,7 @@ def render():
         highlight=True,
     ).add_to(map)
 
-    # --- LES AEROPORTS ---
+    # LES AEROPORTS
     fg_airports = folium.FeatureGroup(name="Aéroports")
 
     for lat,lng,size,name in zip(LATS_PORTS,LONGS_PORTS,ROUTES,NAME_PORTS):
@@ -77,15 +77,15 @@ def render():
             popup = "{} routes".format(size)
         ).add_to(fg_airports)
 
-    # J'ajoute tout ça à la carte
+    # On ajoute tout ça à la carte
     fg_airports.add_to(map)
 
-    # --- MAINTENANT LES AVIONS ---
-    # Je charge le fichier traffic
+    # MAINTENANT LES AVIONS
+    # On charge le fichier traffic
     df_plane = load_data("traffic")
     df_plane_france = df_plane.query("origin_country == 'France'")
 
-    # Je recupere les colonnes dont j'ai besoin pour faire ma boucle
+    # On recupere les colonnes dont on a besoin pour faire la boucle
     LATS_PLANE = df_plane_france["latitude"]
     LONGS_PLANE = df_plane_france["longitude"]
     ANGLE_AVION = df_plane_france["true_track"]    # Cap de l'avion (0-360°)
@@ -94,12 +94,12 @@ def render():
     PAYS = df_plane_france["origin_country"]
     ALTITUDE = df_plane_france["baro_altitude"]
 
-    # --- AJOUT DE LA COUCHE AVIONS ---  
+    # AJOUT DE LA COUCHE AVIONS 
     fg_planes = folium.FeatureGroup(name="Avions en vol")
 
     for lat,lng,angle,callsign,vit,pays,alt in zip(LATS_PLANE,LONGS_PLANE,ANGLE_AVION,CALLSIGNS, VITESSE, PAYS, ALTITUDE):
 
-        # Code HTML pour l'icone de l'avion (j'utilise CSS pour le faire tourner)
+        # Code HTML pour l'icone de l'avion (on utilise CSS pour le faire tourner)
         content_html = f"""
         <div style="
             font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -129,11 +129,11 @@ def render():
         </div>
         """
 
-        # On crée l'objet Popup (iframe=False est important pour que le style passe bien)
+        # On crée l'objet Popup
         popup_objet = folium.Popup(content_html, max_width=250)
 
 
-        # On indique au html la rotation de l'image de l'avion en fonction de la direction réelle de l'avion
+        # On indique au html la rotation de l'image de l'avion en fonction de la direction réelle de l'avion (leur cap)
         content_icone = f"""
             <div style="transform: rotate({angle}deg);">
                 <img src="/assets/avion_icone.png" style="width:30px; height:30px;">
@@ -158,7 +158,7 @@ def render():
     # Ajout du groupe d'avions à la carte principale
     fg_planes.add_to(map)
 
-    # --- FINALISATION ET SAUVEGARDE ---
+    # FINALISATION ET SAUVEGARDE
     # Ajout du panneau de contrôle pour activer/désactiver les couches
     folium.LayerControl().add_to(map)
 
