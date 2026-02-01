@@ -29,6 +29,7 @@ def get_continent(lat, lon):
     if pd.isna(lat) or pd.isna(lon):
         return "Inconnu"
     
+    # Même logique que dans cheeze.py, je réutilise les bornes GPS
     if 35 <= lat <= 71 and -25 <= lon <= 45:
         return "Europe"
     elif 15 <= lat <= 72 and -170 <= lon <= -50:
@@ -64,6 +65,7 @@ def render(df=None):
         return html.Div("En attente de données...", style={'color': COLORS['text_dim']})
         
     df['continent'] = df.apply(lambda row: get_continent(row['latitude'], row['longitude']), axis=1)
+    # Hop, on ne garde que ce qu'on a réussi à identifier
     df_plot = df[df['continent'] != "Inconnu"].copy()
 
     couleurs_map = {
@@ -79,7 +81,7 @@ def render(df=None):
         df_plot, 
         x='baro_altitude', 
         nbins=40, 
-        range_x=[0, 13000],
+        range_x=[0, 13000], # Je coupe à 13km parce qu'au dessus y'a quasiment personne, ça sert à rien d'afficher du vide
         color='continent',
         color_discrete_map=couleurs_map,
         template="plotly_dark"
@@ -92,6 +94,7 @@ def render(df=None):
     )
     
     fig.update_layout(
+        # Fond transparent pour l'intégration propre dans le dash
         paper_bgcolor='rgba(0,0,0,0)', 
         plot_bgcolor='rgba(0,0,0,0)',
         font_color=COLORS['text'],

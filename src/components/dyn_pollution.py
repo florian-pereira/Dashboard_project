@@ -20,6 +20,15 @@ import numpy as np
 from dash import dcc, html
 
 def get_continent_mapping():
+    """
+    Crée un dictionnaire de correspondance Pays -> Continent.
+
+    Permet d'associer chaque pays du dataset d'émissions à sa zone géographique
+    pour la coloration et le filtrage dans le graphique.
+
+    Returns:
+        dict: Dictionnaire { 'NomPays': 'Continent' }.
+    """
     mapping = {
         'Asia': [
             'Hong Kong', 'EEast Timor', 'Afghanistan', 'Armenia', 'Azerbaijan', 'Bahrain', 'Bangladesh', 'Bhutan', 'Brunei', 
@@ -211,6 +220,15 @@ for frame in fig.frames:
 
 
 def get_aviation_chart_component():
+    """
+    Retourne le conteneur HTML du graphique animé.
+
+    Sert d'interface entre ce module de calcul complexe et le layout principal
+    de l'application.
+
+    Returns:
+        html.Div: Composant Dash contenant le graphique d'empreinte carbone.
+    """
     return html.Div([
         dcc.Graph(
             figure=fig, 
