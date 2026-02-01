@@ -1,5 +1,13 @@
+"""
+Page principale du dashboard.
+
+Définit la structure et la mise en page de l'interface utilisateur
+en assemblant les différents composants visuels (carte, graphiques, KPIs).
+Le layout utilise une organisation en grille Flexbox pour une
+disposition responsive des éléments.
+"""
+
 from dash import html, dcc
-# J'ai ajouté 'aviation_chart' à la liste des imports
 from src.components import keys, map_view, charts, cheeze, dyn_pollution
 
 COLORS = {
@@ -22,10 +30,10 @@ CARD_STYLE = {
 def layout():
     return html.Div([
         
-        # --- 0. TIMERS (Pour le temps réel) ---
+        # --- 0. LE TIMER ---
         dcc.Interval(id='interval-component', interval=60*1000, n_intervals=0),
 
-        # --- 1. INTRODUCTION (En-tête) ---
+        # --- 1. LE TITRE ---
         html.Div([
             html.H1("Trafic Aérien", 
                     style={'color': COLORS['text'], 'fontWeight': 'bold', 'marginBottom': '10px'}),
@@ -40,13 +48,13 @@ def layout():
                     "de l'empreinte écologique laissée par le transport aérien.",
                     style={'color': COLORS['text_dim'], 'fontSize': '14px', 'margin': '0'}
                 )
-            ], style={**CARD_STYLE, 'borderLeft': f'5px solid {COLORS["electric_blue"]}', 'paddingLeft': '30px', 'minHeight': '100px'})
+            ] , style={**CARD_STYLE, 'borderLeft': f'5px solid {COLORS["electric_blue"]}', 'paddingLeft': '30px', 'minHeight': '100px'})
         ], style={'width': '100%', 'marginBottom': '20px'}),
 
-        # --- 2. ZONE PRINCIPALE (LIGNE DU MILIEU) ---
+        # --- 2. PARTIE CENTRALE ---
         html.Div([
             
-            # COL 1 : KPIs (10%)
+            # COLONNE 1 : Les chiffres clés
             html.Div([
                 keys.render()
             ], style={
@@ -57,9 +65,9 @@ def layout():
                 'justifyContent': 'space-between' 
             }),
 
-            # COL 2 : MAP (60%)
+            # COLONNE 2 : La Carte
             html.Div([
-                map_view.render() # Si render() renvoie un Graph direct, c'est bon. Sinon attention aux IDs.
+                map_view.render() # (Attention aux IDs si le render renvoie pas directement un graphe)
             ], style={
                 'width': '60%',           
                 'minWidth': '0',          
@@ -67,10 +75,10 @@ def layout():
                 'borderRadius': '12px'    
             }),
 
-            # COL 3 : CAMEMBERT + TEXTE (28%)
+            # COLONNE 3 : Droite
             html.Div([
                 
-                # BLOC HAUT : Le graphique Camembert
+                # Graphique Camembert (en haut)
                 html.Div([
                     cheeze.render()
                 ], style={
@@ -82,7 +90,7 @@ def layout():
                     'position': 'relative'
                 }),
 
-                # BLOC BAS : Le Texte Explicatif
+                # Texte explicatif (en bas)
                 html.Div([
                     html.H5("Note Méthodologique", 
                             style={

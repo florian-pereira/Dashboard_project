@@ -1,3 +1,13 @@
+"""
+Composant de visualisation cartographique.
+
+Génère une carte interactive Folium affichant :
+- Les aéroports mondiaux (cercles proportionnels au nombre de routes)
+- Les avions en vol (icônes orientées selon leur cap)
+- Une couche choroplèthe des émissions CO₂ par continent
+
+La carte est intégrée au dashboard Dash via une iframe HTML.
+"""
 
 import folium, branca 
 import pandas as pd
@@ -17,20 +27,20 @@ def render():
     Génère la carte et la retourne sous forme de composant Dash.
     """
 
-    #Lecture du fichier csv dans une dataframe
+    # Je charge le fichier des aéroports
     df_airports = load_data("airports")
 
-    # Extraction des colonnes nécessaires pour la boucle
+    # Je recupere les colonnes dont j'ai besoin pour faire ma boucle
     LATS_PORTS = df_airports["Latitude"]
     LONGS_PORTS = df_airports["Longitude"]
     ROUTES = df_airports["Route_Count"]
     NAME_PORTS = df_airports["Name"]
 
     # --- CREATION DE LA CARTE ---
-    # Initialisation des coordonnées, centrées sur la France
+    # Coordonnées de départ (centré sur la France)
     coords = (46.539758, 2.430331)
 
-    # Création de la carte avec un fond sombre (Dark Matter)
+    # Je crée la carte, j'ai mis un fond sombre c'est plus joli
     map = folium.Map(location=coords, 
                     tiles='Cartodb dark_matter', 
                     zoom_start=6, 
@@ -53,7 +63,7 @@ def render():
         highlight=True,
     ).add_to(map)
 
-    # --- AJOUT DE LA COUCHE AEROPORTS ---
+    # --- LES AEROPORTS ---
     fg_airports = folium.FeatureGroup(name="Aéroports")
 
     for lat,lng,size,name in zip(LATS_PORTS,LONGS_PORTS,ROUTES,NAME_PORTS):
@@ -67,15 +77,15 @@ def render():
             popup = "{} routes".format(size)
         ).add_to(fg_airports)
 
-    # Ajout du groupe d'aéroports à la carte principale
+    # J'ajoute tout ça à la carte
     fg_airports.add_to(map)
 
-    # --- PREPARATION ET CHARGEMENT DES DONNEES DES AVIONS ---
-    # Lecture du fichier csv des avions dans une dataframe
+    # --- MAINTENANT LES AVIONS ---
+    # Je charge le fichier traffic
     df_plane = load_data("traffic")
     df_plane_france = df_plane.query("origin_country == 'France'")
 
-    # Extraction des colonnes nécessaires pour la boucle
+    # Je recupere les colonnes dont j'ai besoin pour faire ma boucle
     LATS_PLANE = df_plane_france["latitude"]
     LONGS_PLANE = df_plane_france["longitude"]
     ANGLE_AVION = df_plane_france["true_track"]    # Cap de l'avion (0-360°)
@@ -89,7 +99,7 @@ def render():
 
     for lat,lng,angle,callsign,vit,pays,alt in zip(LATS_PLANE,LONGS_PLANE,ANGLE_AVION,CALLSIGNS, VITESSE, PAYS, ALTITUDE):
 
-        # Création du HTML pour l'icône : on utilise CSS pour la rotation
+        # Code HTML pour l'icone de l'avion (j'utilise CSS pour le faire tourner)
         content_html = f"""
         <div style="
             font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;

@@ -1,3 +1,11 @@
+"""
+Configuration centralisée du projet.
+
+Regroupe l'ensemble des chemins de fichiers et URLs utilisés
+dans l'application. Cette centralisation facilite la maintenance
+et évite la duplication de constantes dans le code.
+"""
+
 import os
 
 # --- 1. Chemins des Dossiers (Architecture) ---

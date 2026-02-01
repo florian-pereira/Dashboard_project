@@ -1,8 +1,20 @@
+"""
+Module de nettoyage et transformation des données.
+
+Traite les données brutes pour les rendre exploitables par le dashboard :
+- Filtrage des valeurs manquantes ou incohérentes
+- Conversion des unités (vitesse m/s vers km/h)
+- Fusion des tables aéroports et routes
+- Calcul des métriques dérivées (nombre de routes par aéroport)
+
+Les données nettoyées sont exportées dans data/cleaned/
+"""
+
 import pandas as pd
 import os
 import sys
 
-# Permet de trouver le fichier config.py à la racine du projet
+# Petit hack pour importer config.py qui est dans le dossier parent
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from config import (
@@ -22,18 +34,18 @@ def process_live_traffic():
     try:
         df = pd.read_csv(TRAFFIC_RAW_FILE)
 
-        # On ne garde que les avions EN L'AIR
+        # Je filtre pour garder seulement les avions qui volent
 
         df = df[ (df['on_ground'] == False) & (df['baro_altitude'].notna()) ].copy()
 
         df = df.dropna(subset=['latitude', 'longitude'])
-        #  Vitesse m/s en km/h
+        # Conversion vitesse m/s -> km/h
         if 'velocity' in df.columns:
             df['velocity_kmh'] = df['velocity'] * 3.6
         else:
             df['velocity_kmh'] = 0      
 
-        #  On ne garde que les colonnes utiles :
+        # Je garde juste les colonnes qui m'intéressent :
         
         cols_to_keep = [
             'icao24', 'callsign', 'origin_country', 'longitude', 'latitude', 
@@ -43,7 +55,7 @@ def process_live_traffic():
         df = df[cols_final]
 
         df.to_csv(TRAFFIC_CLEANED_FILE, index=False)
-        print(f" Il y a {len(df)} avions en vol.")
+        print(f" Il y a {len(df)} avions en vol, après nettoyage.")
 
     except Exception as e:
         print(f"  Erreur nettoyage trafic : {e}")
@@ -62,24 +74,24 @@ def process_static_data():
         df_air = pd.read_csv(AIRPORTS_RAW_FILE)
         df_routes = pd.read_csv(ROUTES_RAW_FILE)
 
-        # Nettoyage de base avec dropna() on ne garde que les aéroports avec Latitude, Longitude et IATA valides
+        # Je supprime les lignes où il manque des infos importantes (Lat/Lon/IATA)
         df_air = df_air.dropna(subset=['Latitude', 'Longitude', 'IATA'])
         
-        # Compté le nombre de routes par aéroport
-        route_counts = df_routes['Source Airport'].value_counts().reset_index() #reset_index pour transformer en une nouvelle DataFrame
+        # Je compte combien de routes partent de chaque aéroport
+        route_counts = df_routes['Source Airport'].value_counts().reset_index() #reset_index pour un dataframe propre
         route_counts.columns = ['IATA', 'Route_Count']
         route_counts['Route_Count'] = route_counts['Route_Count']
 
-        # fusion des données d'aéroports avec le nombre de routes dans une nouvelle dataframe
+        # Je fusionne les aéroports avec le nombre de routes
         df_merged = pd.merge(df_air, route_counts, on='IATA', how='left')
-        df_merged['Route_Count'] = df_merged['Route_Count'].fillna(0)# Remplacer NaN par 0 
-
-        # on garde les aéroports avec au moins 5 routes 
+        df_merged['Route_Count'] = df_merged['Route_Count'].fillna(0)# Si pas de route, je mets 0
+ 
+        # Je filtre les petits aéroports (au moins 5 routes)
         df_final = df_merged.query("Route_Count >= 5 ").copy()
 
         # Sauvegarde
         df_final.to_csv(AIRPORTS_CLEANED_FILE, index=False)
-        print(f" Aéroports traités : {len(df_final)} lignes.")
+        print(f" Aéroports après nettoyage : {len(df_final)} lignes.")
 
     except Exception as e:
         print(f" Erreur traitement aéroports : {e}")
@@ -91,7 +103,7 @@ def load_data(dataset="traffic"):
     """
     if dataset == "traffic":
         path = TRAFFIC_CLEANED_FILE
-        # Liste des colonnes qu'on veut ABSOLUMENT en int
+        # Liste des colonnes que je veux convertir en entier
         int_cols = ['baro_altitude', 'velocity_kmh']
     
     elif dataset == "airports":
@@ -102,13 +114,13 @@ def load_data(dataset="traffic"):
         return None
 
     if os.path.exists(path):
-        # 1. On lit SANS forcer les types (pour éviter le crash immédiat)
+        # 1. Lecture simple du CSV
         df = pd.read_csv(path)
 
-        # 2. On convertit proprement chaque colonne
+        # 2. Conversion en nombres entiers
         for col in int_cols:
             if col in df.columns:
-                # 'coerce' transforme les erreurs (textes, bugs) en NaN
+                # Si bug dans la conversion, ça met NaN
                 # round() gère les cas où on aurait 850.9 pour en faire 851
                 df[col] = pd.to_numeric(df[col], errors='coerce').round().astype('Int64')
 

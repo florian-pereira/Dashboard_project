@@ -79,23 +79,31 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 path_pollution = os.path.join(current_dir, '..', '..', 'data', 'cleaned', 'annual-co-emissions-from-aviation.csv')
 path_airports = os.path.join(current_dir, '..', '..', 'data', 'cleaned', 'airports_cleaned.csv')
 
+# Chargement des fichiers
 df = pd.read_csv(path_pollution)
 df_airports = pd.read_csv(path_airports)
 
+# Je m'assure que l'année est bien un chiffre
 df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
 df = df.dropna(subset=['Year'])
 df['Year'] = df['Year'].astype(int)
 
+# Je compte le nombre total de routes par pays
 df_routes = df_airports.groupby('Country')['Route_Count'].sum().reset_index()
 df_routes.rename(columns={'Route_Count': 'Total_Routes'}, inplace=True)
 
+# J'ajoute la colonne Continent pour chaque pays
 continent_map = get_continent_mapping()
 df['continent'] = df['Entity'].map(continent_map)
+
+# Je retire les regroupements bizarres (Monde, EU...) pour garder que les VRAIS pays
 blacklist = ['World', 'Africa', 'Asia', 'Europe', 'Oceania', 'South America', 'North America', 'European Union (28)']
 df_clean = df[~df['Entity'].isin(blacklist)].copy()
 df_clean = df_clean.dropna(subset=['continent'])
 
+# Fusion des données pollution + routes
 df_clean = pd.merge(df_clean, df_routes, left_on='Entity', right_on='Country', how='left')
+# Je vire ceux où il manque des infos
 df_clean = df_clean.dropna(subset=['Total_Routes'])
 df_clean = df_clean[df_clean['Total_Routes'] > 0] 
 

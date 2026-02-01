@@ -1,3 +1,13 @@
+"""
+Module de récupération des données externes.
+
+Gère les appels aux APIs et le téléchargement des fichiers sources :
+- OpenSky Network : positions des avions en temps réel
+- OpenFlights : base de données des aéroports et routes aériennes
+
+Les données brutes sont stockées dans le dossier data/raw/
+"""
+
 import urllib.request
 import urllib.error
 import json
@@ -5,7 +15,7 @@ import pandas as pd
 import os
 import sys
 
-# Permet de remonter à la racine pour trouver 'config.py'
+# Pour importer config depuis la racine
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from config import (
@@ -17,7 +27,7 @@ from config import (
 raw_path = "data/raw"
 cleaned_path = "data/cleaned"
 
-# Création automatique des dossiers s'ils n'existent pas
+# Je crée les dossiers si ils existent pas
 os.makedirs(raw_path, exist_ok=True)
 os.makedirs(cleaned_path, exist_ok=True)
 
@@ -30,8 +40,8 @@ def get_live_traffic_data():
     Sauvegarde les données brutes dans 'traffic_raw.csv'.
     """
     
-    # Paramètres pour cibler la l'Europe
-    # l'API OpenSky demande des paramètres dans l'URL
+    # Zone géographique (Europe)
+    # J'ajoute les parametres à l'URL
     params = "?lamin=35.00&lomin=-15.00&lamax=72.00&lomax=45.00"
     url = OPENSKY_URL 
     
@@ -43,11 +53,11 @@ def get_live_traffic_data():
             data_str = data.decode('utf-8')
             json_data = json.loads(data_str)
             
-            # Extraction de la liste des avions
+            # Je récupère la liste des avions du JSON
             flights = json_data.get('states', [])
             
             if flights:
-                # On définit les colonnes selon la doc OpenSky: https://openskynetwork.github.io/opensky-api/rest.html
+                # Noms des colonnes (trouvé dans la doc OpenSky)
                 cols = ["icao24", "callsign", "origin_country", "time_position", 
                         "last_contact", "longitude", "latitude", "baro_altitude", 
                         "on_ground", "velocity", "true_track", "vertical_rate", 
@@ -68,7 +78,7 @@ def get_live_traffic_data():
 def get_static_AeroportsRoads_data():
 
     try:
-        #Documentation : https://openflights.org/data pour les noms des colonnes (aireports et routes)
+        # J'ai pris les noms de colonnes sur le site OpenFlights
         # AÉROPORTS
         
         cols_airports = ["Airport ID", "Name", "City", "Country", "IATA", "ICAO", 
