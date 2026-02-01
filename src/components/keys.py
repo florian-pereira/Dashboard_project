@@ -45,7 +45,10 @@ def convert_co(total_pollution):
         return f"{total_pollution:0.1f} t"
 
 def render():
-
+    """
+    Génère le conteneur vertical affichant les 3 cartes KPIs (Vols, France, CO2).
+    Utilise un layout Flexbox pour répartir les cartes sur toute la hauteur disponible.
+    """
     nb_plane, nb_plane_france , total_co2= get_kpi_value()
     # --- STYLE DU CONTENEUR ---
     container_style = {
