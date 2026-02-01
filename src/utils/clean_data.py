@@ -15,18 +15,24 @@ import os
 import sys
 
 # Petit hack pour importer config.py qui est dans le dossier parent
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 
 from config import (
-    TRAFFIC_RAW_FILE, AIRPORTS_RAW_FILE, ROUTES_RAW_FILE,
-    TRAFFIC_CLEANED_FILE, AIRPORTS_CLEANED_FILE
+    TRAFFIC_RAW_FILE,
+    AIRPORTS_RAW_FILE,
+    ROUTES_RAW_FILE,
+    TRAFFIC_CLEANED_FILE,
+    AIRPORTS_CLEANED_FILE,
 )
+
 
 def process_live_traffic():
     """
     Nettoie les données de trafic  (Avions)
     """
-    
+
     if not os.path.exists(TRAFFIC_RAW_FILE):
         print(" Fichier introuvable. Lancer d'abord get_data.py.")
         return
@@ -34,22 +40,29 @@ def process_live_traffic():
     try:
         df = pd.read_csv(TRAFFIC_RAW_FILE)
 
-        # Je filtre pour garder seulement les avions qui volent
+        # On filtre pour garder seulement les avions qui volent
 
-        df = df[ (df['on_ground'] == False) & (df['baro_altitude'].notna()) ].copy()
+        df = df[(df["on_ground"] == False) & (df["baro_altitude"].notna())].copy()
 
-        df = df.dropna(subset=['latitude', 'longitude'])
+        df = df.dropna(subset=["latitude", "longitude"])
         # Conversion vitesse m/s -> km/h
-        if 'velocity' in df.columns:
-            df['velocity_kmh'] = df['velocity'] * 3.6
+        if "velocity" in df.columns:
+            df["velocity_kmh"] = df["velocity"] * 3.6
         else:
-            df['velocity_kmh'] = 0      
+            df["velocity_kmh"] = 0
 
-        # Je garde juste les colonnes qui m'intéressent :
-        
+        # On garde juste les colonnes qui nous intéressent :
+
         cols_to_keep = [
-            'icao24', 'callsign', 'origin_country', 'longitude', 'latitude', 
-            'baro_altitude', 'true_track', 'velocity_kmh', 'origin_country'
+            "icao24",
+            "callsign",
+            "origin_country",
+            "longitude",
+            "latitude",
+            "baro_altitude",
+            "true_track",
+            "velocity_kmh",
+            "origin_country",
         ]
         cols_final = [c for c in cols_to_keep if c in df.columns]
         df = df[cols_final]
@@ -60,33 +73,37 @@ def process_live_traffic():
     except Exception as e:
         print(f"  Erreur nettoyage trafic : {e}")
 
+
 def process_static_data():
     """
     Fusionne Aéroports et Routes pour calculer la taille des hubs.
     """
-    
+
     if not os.path.exists(AIRPORTS_RAW_FILE) or not os.path.exists(ROUTES_RAW_FILE):
         print(" Fichiers RAW introuvables (Airports ou Routes manquants).")
         return
 
     try:
-        
         df_air = pd.read_csv(AIRPORTS_RAW_FILE)
         df_routes = pd.read_csv(ROUTES_RAW_FILE)
 
-        # Je supprime les lignes où il manque des infos importantes (Lat/Lon/IATA)
-        df_air = df_air.dropna(subset=['Latitude', 'Longitude', 'IATA'])
-        
-        # Je compte combien de routes partent de chaque aéroport
-        route_counts = df_routes['Source Airport'].value_counts().reset_index() #reset_index pour un dataframe propre
-        route_counts.columns = ['IATA', 'Route_Count']
-        route_counts['Route_Count'] = route_counts['Route_Count']
+        # on supprime les lignes où il manque des infos importantes (Lat/Lon/IATA)
+        df_air = df_air.dropna(subset=["Latitude", "Longitude", "IATA"])
 
-        # Je fusionne les aéroports avec le nombre de routes
-        df_merged = pd.merge(df_air, route_counts, on='IATA', how='left')
-        df_merged['Route_Count'] = df_merged['Route_Count'].fillna(0)# Si pas de route, je mets 0
- 
-        # Je filtre les petits aéroports (au moins 5 routes)
+        # On compte combien de routes partent de chaque aéroport
+        route_counts = (
+            df_routes["Source Airport"].value_counts().reset_index()
+        )  # reset_index pour un dataframe propre
+        route_counts.columns = ["IATA", "Route_Count"]
+        route_counts["Route_Count"] = route_counts["Route_Count"]
+
+        # On fusionne les aéroports avec le nombre de routes
+        df_merged = pd.merge(df_air, route_counts, on="IATA", how="left")
+        df_merged["Route_Count"] = df_merged["Route_Count"].fillna(
+            0
+        )  # Si pas de route, je mets 0
+
+        # On filtre les petits aéroports (au moins 5 routes)
         df_final = df_merged.query("Route_Count >= 5 ").copy()
 
         # Sauvegarde
@@ -96,6 +113,7 @@ def process_static_data():
     except Exception as e:
         print(f" Erreur traitement aéroports : {e}")
 
+
 def load_data(dataset="traffic"):
     """
     Charge les données PROPRES pour le dashboard
@@ -103,13 +121,13 @@ def load_data(dataset="traffic"):
     """
     if dataset == "traffic":
         path = TRAFFIC_CLEANED_FILE
-        # Liste des colonnes que je veux convertir en entier
-        int_cols = ['baro_altitude', 'velocity_kmh']
-    
+        # Liste des colonnes qu'on veut convertir en entier
+        int_cols = ["baro_altitude", "velocity_kmh"]
+
     elif dataset == "airports":
         path = AIRPORTS_CLEANED_FILE
-        int_cols = ['Route_Count']
-    
+        int_cols = ["Route_Count"]
+
     else:
         return None
 
@@ -122,10 +140,11 @@ def load_data(dataset="traffic"):
             if col in df.columns:
                 # Si bug dans la conversion, ça met NaN
                 # round() gère les cas où on aurait 850.9 pour en faire 851
-                df[col] = pd.to_numeric(df[col], errors='coerce').round().astype('Int64')
+                df[col] = (
+                    pd.to_numeric(df[col], errors="coerce").round().astype("Int64")
+                )
 
         return df
     else:
         print(f" Fichier {path} introuvable. ")
         return pd.DataFrame()
-

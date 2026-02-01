@@ -31,7 +31,7 @@ app = Dash(__name__)
 
 # J'appelle la fonction layout
 # Si c'était une variable, pas besoin de ()
-app.layout = layout() 
+app.layout = layout()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

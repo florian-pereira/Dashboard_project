@@ -22,12 +22,16 @@ CLEANED_DIR = os.path.join(DATA_DIR, "cleaned")
 OPENSKY_URL = "https://opensky-network.org/api/states/all"
 
 # B. Source Statique (Infrastructure Aérienne - OpenFlights)
-# Documentation : https://openflights.org/data 
-# OpenFlights est découpée en plusieurs tables (Aéroports, Routes, Compagnies) est un détail technique de leur structure. 
+# Documentation : https://openflights.org/data
+# OpenFlights est découpée en plusieurs tables (Aéroports, Routes, Compagnies) est un détail technique de leur structure.
 # Nous récupérons Aéroports et Routes, pour ensuite effectuer une Fusion (Merge) dans clean_data.py .
 # Note : On utilise les fichiers bruts (Raw) depuis GitHub car OpenFlights ne fournit pas d'API officielle.
-AIRPORTS_URL = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
-ROUTES_URL = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/routes.dat"
+AIRPORTS_URL = (
+    "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
+)
+ROUTES_URL = (
+    "https://raw.githubusercontent.com/jpatokal/openflights/master/data/routes.dat"
+)
 
 # --- 3. Noms des Fichiers (Stockage) ---
 # Fichiers Bruts (Raw)

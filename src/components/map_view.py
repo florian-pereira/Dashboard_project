@@ -9,7 +9,7 @@ Génère une carte interactive Folium affichant :
 La carte est intégrée au dashboard Dash via une iframe HTML.
 """
 
-import folium, branca 
+import folium, branca
 import pandas as pd
 import os
 import sys
@@ -17,10 +17,13 @@ import math
 from dash import html
 
 # Ajout du dossier racine au chemin système pour pouvoir importer les modules du projet
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 
 # Import de la fonction personnalisée pour charger les données nettoyées
 from src.utils.clean_data import load_data
+
 
 def render():
     """
@@ -41,22 +44,24 @@ def render():
     coords = (46.539758, 2.430331)
 
     # On crée la carte avec un fond sombre c'est plus joli
-    map = folium.Map(location=coords, 
-                    tiles='Cartodb dark_matter', 
-                    zoom_start=6, 
-                    min_zoom=2, 
-                    max_bounds=True)
+    map = folium.Map(
+        location=coords,
+        tiles="Cartodb dark_matter",
+        zoom_start=6,
+        min_zoom=2,
+        max_bounds=True,
+    )
 
     df_pollution = pd.read_csv("data/cleaned/annual-co-emissions-from-aviation.csv")
     df_pollution_2024 = df_pollution.query("Year == 2024")
 
     folium.Choropleth(
-        geo_data = "data/geo/continents.json",
-        name = "Polution Atmosphérique",
-        data = df_pollution_2024,
-        columns = ["Entity","Total annual CO₂ emissions from aviation"],
-        key_on = "feature.properties.CONTINENT",
-        fill_color="YlOrRd",              # Yellow -> Orange -> Red (Plus c'est haut, plus c'est rouge)
+        geo_data="data/geo/continents.json",
+        name="Polution Atmosphérique",
+        data=df_pollution_2024,
+        columns=["Entity", "Total annual CO₂ emissions from aviation"],
+        key_on="feature.properties.CONTINENT",
+        fill_color="YlOrRd",  # Yellow -> Orange -> Red (Plus c'est haut, plus c'est rouge)
         fill_opacity=0.7,
         line_opacity=0.2,
         legend_name="Pollution (tonnes CO2)",
@@ -66,15 +71,15 @@ def render():
     # LES AEROPORTS
     fg_airports = folium.FeatureGroup(name="Aéroports")
 
-    for lat,lng,size,name in zip(LATS_PORTS,LONGS_PORTS,ROUTES,NAME_PORTS):
+    for lat, lng, size, name in zip(LATS_PORTS, LONGS_PORTS, ROUTES, NAME_PORTS):
         folium.CircleMarker(
-            location = [lat,lng],
-            radius = math.sqrt(size)*0.5,
-            color = 'crimson',
-            fill = True,
-            fill_color = 'crimson',
-            tooltip = name,
-            popup = "{} routes".format(size)
+            location=[lat, lng],
+            radius=math.sqrt(size) * 0.5,
+            color="crimson",
+            fill=True,
+            fill_color="crimson",
+            tooltip=name,
+            popup="{} routes".format(size),
         ).add_to(fg_airports)
 
     # On ajoute tout ça à la carte
@@ -88,17 +93,18 @@ def render():
     # On recupere les colonnes dont on a besoin pour faire la boucle
     LATS_PLANE = df_plane_france["latitude"]
     LONGS_PLANE = df_plane_france["longitude"]
-    ANGLE_AVION = df_plane_france["true_track"]    # Cap de l'avion (0-360°)
+    ANGLE_AVION = df_plane_france["true_track"]  # Cap de l'avion (0-360°)
     CALLSIGNS = df_plane_france["callsign"]
     VITESSE = df_plane_france["velocity_kmh"]
     PAYS = df_plane_france["origin_country"]
     ALTITUDE = df_plane_france["baro_altitude"]
 
-    # AJOUT DE LA COUCHE AVIONS 
+    # AJOUT DE LA COUCHE AVIONS
     fg_planes = folium.FeatureGroup(name="Avions en vol")
 
-    for lat,lng,angle,callsign,vit,pays,alt in zip(LATS_PLANE,LONGS_PLANE,ANGLE_AVION,CALLSIGNS, VITESSE, PAYS, ALTITUDE):
-
+    for lat, lng, angle, callsign, vit, pays, alt in zip(
+        LATS_PLANE, LONGS_PLANE, ANGLE_AVION, CALLSIGNS, VITESSE, PAYS, ALTITUDE
+    ):
         # Code HTML pour l'icone de l'avion (on utilise CSS pour le faire tourner)
         content_html = f"""
         <div style="
@@ -132,7 +138,6 @@ def render():
         # On crée l'objet Popup
         popup_objet = folium.Popup(content_html, max_width=250)
 
-
         # On indique au html la rotation de l'image de l'avion en fonction de la direction réelle de l'avion (leur cap)
         content_icone = f"""
             <div style="transform: rotate({angle}deg);">
@@ -142,17 +147,20 @@ def render():
 
         # Utilisation de DivIcon pour insérer notre HTML personnalisé
         icone_avion = folium.DivIcon(
-            icon_size = (35,35),
-            icon_anchor = (15,15), # Point de pivot au centre de l'image pour une rotation correcte
-            html = content_icone,
+            icon_size=(35, 35),
+            icon_anchor=(
+                15,
+                15,
+            ),  # Point de pivot au centre de l'image pour une rotation correcte
+            html=content_icone,
         )
 
         # Création du marqueur avion
         folium.Marker(
-            location = [lat,lng],
-            icon = icone_avion,
+            location=[lat, lng],
+            icon=icone_avion,
             popup=popup_objet,
-            tooltip=f"Vol {callsign}"
+            tooltip=f"Vol {callsign}",
         ).add_to(fg_planes)
 
     # Ajout du groupe d'avions à la carte principale
@@ -165,20 +173,22 @@ def render():
     map_html = map.get_root().render()
 
     # On retourne une Iframe qui contient le HTML de la map
-    return html.Div([
-    html.Iframe(
-        srcDoc=map_html,
+    return html.Div(
+        [
+            html.Iframe(
+                srcDoc=map_html,
+                style={
+                    "width": "100%",
+                    "height": "600px",
+                    "border": "none",
+                    "borderRadius": "15px",  # <--- ARRONDIS SUR L'IFRAME
+                },
+            )
+        ],
         style={
-            'width': '100%', 
-            'height': '600px', 
-            'border': 'none',
-            'borderRadius': '15px'  # <--- ARRONDIS SUR L'IFRAME
-        }
+            "width": "100%",
+            "borderRadius": "15px",  # <--- ARRONDIS SUR LE CADRE
+            "overflow": "hidden",  # <--- INDISPENSABLE pour couper les coins
+            "boxShadow": "0 4px 20px rgba(0,0,0,0.5)",
+        },
     )
-], style={
-    'width': '100%', 
-    'borderRadius': '15px',     # <--- ARRONDIS SUR LE CADRE
-    'overflow': 'hidden',       # <--- INDISPENSABLE pour couper les coins
-    'boxShadow': '0 4px 20px rgba(0,0,0,0.5)'
-})
-
