@@ -22,7 +22,7 @@ Le dashboard dépasse la simple visualisation de positions : il propose une réf
 
 1.  Clonez le dépôt :
     ```bash
-    git clone https://github.com/votre-repo/dashboard-aviation.git
+    git clone https://github.com/florian-pereira/Dashboard_project.git
     ```
 
 2.  Installez les dépendances nécessaires :
@@ -46,15 +46,18 @@ Le projet consolide plusieurs sources de données ouvertes pour garantir la pré
 
 1.  **OpenSky Network** :
     *   Données de trafic aérien en temps réel (ou snapshots récents).
+    *   *Endpoint API :* `https://opensky-network.org/api/states/all`
     *   Utilisé pour la cartographie des positions et l'analyse des altitudes.
     *   *Script de récupération :* `src/utils/get_data.py`.
 
 2.  **Our World in Data (OWID)** :
-    *   Dataset : *Annual CO₂ emissions from aviation*.
+    *   Dataset : [*Annual CO₂ emissions from aviation*](https://ourworldindata.org/co2-emissions-from-aviation)
     *   Utilisé pour l'axe historique et la comparaison des empreintes carbones par pays.
 
 3.  **OpenFlights / OurAirports** :
     *   Base de données statique des aéroports et des routes aériennes.
+    *   *Dataset Aéroports :* [`airports.dat`](https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat)
+    *   *Dataset Routes :* [`routes.dat`](https://raw.githubusercontent.com/jpatokal/openflights/master/data/routes.dat)
     *   Permet le calcul de la densité des réseaux aériens (nombre de routes par pays).
     *   *Fichiers bruts :* `data/raw/airports_raw.csv`, `traffic_raw.csv`.
 
