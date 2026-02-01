@@ -10,7 +10,6 @@ Accès : http://127.0.0.1:8050
 """
 
 from dash import Dash
-from src.pages.home import layout
 from src.utils.get_data import get_live_traffic_data, get_static_AeroportsRoads_data
 from src.utils.clean_data import process_live_traffic, load_data, process_static_data
 
@@ -25,6 +24,9 @@ get_static_AeroportsRoads_data()
 
 # Nettoyage données aéroports
 process_static_data()
+
+# Import du layout APRÈS la génération des données
+from src.pages.home import layout
 
 
 app = Dash(__name__)
