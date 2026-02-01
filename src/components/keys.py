@@ -1,6 +1,55 @@
 from dash import html
+import pandas as pd
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from src.utils.clean_data import load_data
+
+def get_kpi_value():
+    """
+    Lit les CSV et calcule :
+    1. Nombre d'avions
+    2. Nombre d'avions qui proviennent de France
+    3. Estimation CO2
+    """
+    #Nombre d'avions actuellement en vol
+    df_traffic = load_data("traffic")
+    count = len(df_traffic)
+    nb_plane = f"{count:,}".replace(",", " ")
+
+    # Aéoroport qui possède le plus de routes (le plus "grand")
+    df_nb_plane_france = df_traffic.query("origin_country == 'France'")
+    count_plane_france = len(df_nb_plane_france)
+    nb_plane_f = f"{count_plane_france:,}".replace(","," ")
+
+    #Pollution
+    df_pollution = pd.read_csv("data/cleaned/annual-co-emissions-from-aviation.csv")
+    df_world_pollution = df_pollution.query("Entity == 'World' and Year == 2024")
+    world_pollution = df_world_pollution["Total annual CO₂ emissions from aviation"].iloc[0]
+    total_pollution = convert_co(world_pollution)
+
+    return nb_plane, nb_plane_f , total_pollution
+
+def convert_co(total_pollution):
+    """
+    Convertit un nombre (tonnes) en format lisible (kt, Mt, Gt).
+    """
+    if total_pollution >= 1_000_000_000:
+        return f"{total_pollution/1_000_000_000:0.1f} Gt"
+    elif total_pollution >= 1_000_000 :
+        return f"{total_pollution/1_000_000:0.1f} Mt"
+    elif total_pollution >= 1_000:
+        return f"{total_pollution/1_000:0.1f} kt"
+    else:
+        return f"{total_pollution:0.1f} t"
 
 def render():
+    """
+    Génère le conteneur vertical affichant les 3 cartes KPIs (Vols, France, CO2).
+    Utilise un layout Flexbox pour répartir les cartes sur toute la hauteur disponible.
+    """
+    nb_plane, nb_plane_france , total_co2= get_kpi_value()
     # --- STYLE DU CONTENEUR ---
     container_style = {
         'display': 'flex',
@@ -50,12 +99,12 @@ def render():
     # --- RETOUR DU LAYOUT ---
     return html.Div([
         # Carte 1 : Bleu
-        create_kpi_card("Vols Actifs", "125", ["#1d8cf8", "#33d9b2"]),
-        
-        # Carte 2 : Orange
-        create_kpi_card("Altitude Moy.", "32k", ["#ff5252", "#ffb142"]),
-        
-        # Carte 3 : Violet
-        create_kpi_card("Vitesse Max", "850", ["#706fd3", "#ff793f"]),
+        create_kpi_card("Vols Actifs", nb_plane , ["#1d8cf8", "#33d9b2"]),
+
+        # Carte 2 : Violet
+        create_kpi_card("Vols Actifs (France)", nb_plane_france , ["#706fd3", "#ff793f"]),
+
+        # Carte 3 : Orange
+        create_kpi_card("Emission Co2", total_co2 , ["#ff5252", "#ffb142"]),
         
     ], style=container_style)
