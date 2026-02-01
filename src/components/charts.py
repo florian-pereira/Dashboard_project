@@ -29,7 +29,7 @@ def get_continent(lat, lon):
     if pd.isna(lat) or pd.isna(lon):
         return "Inconnu"
     
-    # Même logique que dans cheeze.py, je réutilise les bornes GPS
+    # Même logique que dans cheeze.py, on réutilise les bornes GPS
     if 35 <= lat <= 71 and -25 <= lon <= 45:
         return "Europe"
     elif 15 <= lat <= 72 and -170 <= lon <= -50:

@@ -41,7 +41,7 @@ def get_live_traffic_data():
     """
     
     # Zone géographique (Europe)
-    # J'ajoute les parametres à l'URL
+    # Ajout des parametres à l'URL
     params = "?lamin=35.00&lomin=-15.00&lamax=72.00&lomax=45.00"
     url = OPENSKY_URL 
     
@@ -53,7 +53,7 @@ def get_live_traffic_data():
             data_str = data.decode('utf-8')
             json_data = json.loads(data_str)
             
-            # Je récupère la liste des avions du JSON
+            # On récupère la liste des avions du JSON
             flights = json_data.get('states', [])
             
             if flights:

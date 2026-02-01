@@ -24,12 +24,12 @@ def get_kpi_value():
     2. Nombre d'avions qui proviennent de France
     3. Estimation CO2
     """
-    # Je compte le nombre d'avions qui volent
+    # On compte le nombre d'avions qui volent
     df_traffic = load_data("traffic")
     count = len(df_traffic)
     nb_plane = f"{count:,}".replace(",", " ")
 
-    # Je compte juste les avions qui viennent de France
+    # compte juste les avions qui viennent de France
     df_nb_plane_france = df_traffic.query("origin_country == 'France'")
     count_plane_france = len(df_nb_plane_france)
     nb_plane_f = f"{count_plane_france:,}".replace(","," ")
@@ -96,18 +96,18 @@ def render():
             'boxShadow': '0 4px 15px rgba(0, 0, 0, 0.4)',
             'textAlign': 'center',
             
-            # --- CENTRAGE VERTICAL DU TEXTE ---
+            # CENTRAGE VERTICAL DU TEXTE
             'display': 'flex',
             'flexDirection': 'column',
             'justifyContent': 'center',
             'alignItems': 'center',
             
-            # --- ELASTICITÉ ---
-            'flex': '1',         # <--- MAGIQUE : La carte grandit pour remplir l'espace vide
+            # ELASTICITÉ
+            'flex': '1',         # La carte grandit pour remplir l'espace vide
             'minHeight': '0'     # Sécurité pour le flexbox
         })
 
-    # --- RETOUR DU LAYOUT ---
+    # RETOUR DU LAYOUT
     return html.Div([
         # Carte 1 : Bleu
         create_kpi_card("Vols Actifs", nb_plane , ["#1d8cf8", "#33d9b2"]),
