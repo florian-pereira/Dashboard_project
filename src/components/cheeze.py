@@ -36,6 +36,8 @@ def get_continent(lat, lon):
     if pd.isna(lat) or pd.isna(lon):
         return "Inconnu"
 
+    # J'ai défini des zones "à la louche" avec des carrés (bounding boxes).
+    # C'est pas hyper précis au mètre près, mais ça suffit largement pour voir dans quel coin du monde est l'avion.
     if 35 <= lat <= 71 and -25 <= lon <= 45:
         return "Europe"
     elif 15 <= lat <= 72 and -170 <= lon <= -50:
@@ -53,6 +55,19 @@ def get_continent(lat, lon):
 
 
 def render(df=None):
+    """
+    Génère le composant graphique (Pie Chart) pour l'interface Dash.
+
+    Cette fonction prépare les données, applique le style visuel et retourne
+    une Div HTML contenant le graphique interactif. Si aucune donnée n'est fournie,
+    elle essaie de charger les données par défaut.
+
+    Args:
+        df (pd.DataFrame, optional): Données de trafic avec positions GPS.
+
+    Returns:
+        html.Div: Le composant prêt à être affiché.
+    """
     if df is None:
         try:
             sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -64,7 +79,11 @@ def render(df=None):
     if df is None or df.empty:
         return html.Div("Aucune donnée disponible", style={'color': COLORS['text'], 'textAlign': 'center'})
 
+    # Je calcule le continent pour chaque ligne du tableau. 
+    # Au début j'avais fait une boucle for mais apply() c'est quand même plus propre.
     df['continent'] = df.apply(lambda row: get_continent(row['latitude'], row['longitude']), axis=1)
+    
+    # On vire ceux qu'on n'a pas réussi à localiser, sinon ça fait une catégorie "Inconnu" qui prend trop de place
     df_filtered = df[df['continent'] != "Inconnu"].copy()
 
     fig = px.pie(
@@ -73,12 +92,12 @@ def render(df=None):
         color='continent',
         color_discrete_map=CONTINENT_COLORS,
         title="<b>Répartition par Continent</b>",
-        hole=0.55, 
+        hole=0.55, # Je fais un donut (trou au milieu) parce que je trouve ça plus joli qu'un camembert plein
         template="plotly_dark"
     )
 
     fig.update_traces(
-        textposition='inside',
+        textposition='inside', # Je mets les pourcentages DANS le graph pour gagner de la place
         textinfo='percent', 
         hovertemplate="<b>%{label}</b><br>Avions: %{value} (%{percent})<extra></extra>",
         marker=dict(line=dict(color=COLORS['card_bg'], width=2)) 
