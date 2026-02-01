@@ -10,6 +10,10 @@ Ce projet a été réalisé dans le cadre de l'unité **"Projet Python"** à l'E
 
 Le dashboard dépasse la simple visualisation de positions : il propose une réflexion sur la saturation de l'espace aérien, l'inégalité de la répartition des flux (Nord vs Sud) et la corrélation directe avec les émissions de CO₂.
 
+Ce projet est un tableau de bord interactif réalisé avec Python et Dash. Il permet d'analyser le trafic aérien et son impact écologique.
+
+> **ℹ️ Précision importante** : 
+> Afin de garantir la fluidité de l'application et la pertinence des données pour ce projet, **seuls les avions en provenance de France sont affichés sur la carte.**
 ---
 
 ## 🚀 User Guide (Guide Utilisateur)
