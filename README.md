@@ -132,3 +132,20 @@ Usage libre pour consultation. Toute réutilisation commerciale du code source n
 
 **Auteurs :** [Florian Pereira], [Killian Mauge], [Théo Petreco].
 *Année 2025-2026.*
+
+### 📝 Florian - Sources et méthodologie
+
+**Pour `get_data.py` et `clean_data.py` :**
+- Le code a été réalisé en s'appuyant sur les cours fournis dans l'unité.
+- Les concepts de récupération de données et de nettoyage avec Pandas ont été appliqués conformément aux exemples vus en cours.
+
+**Pour `home.py` (Layout et mise en page) :**
+- J'ai utilisé l'IA générative comme **outil d'exploration** pour découvrir les arguments disponibles en HTML et CSS pour le style du dashboard, notamment :
+  - `border-radius` : pour arrondir les angles des composants
+  - `box-shadow` : pour ajouter des ombres portées
+  - `padding` / `margin` : pour gérer les espacements
+  - `flexbox` / `display: flex` : pour l'alignement des éléments
+  - `background-color`, `color` : pour la gestion des couleurs
+  - `font-family`, `font-size` : pour la typographie
+
+⚠️ **Important** : Le code n'a jamais été copié-collé directement. L'IA a servi uniquement de documentation interactive pour comprendre les propriétés CSS et leurs valeurs possibles. Chaque ligne de code a été comprise et adaptée au contexte du projet.
